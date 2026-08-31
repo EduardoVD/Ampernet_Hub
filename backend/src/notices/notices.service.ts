@@ -1,70 +1,86 @@
-//Português - Importa decorators de injeção e exceções HTTP padrão do NestJS.
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-//Português - Importa o decorator para injeção do repositório da entidade Notice.
 import { InjectRepository } from '@nestjs/typeorm';
-
-//Português - Importa o tipo genérico Repository do TypeORM.
 import { Repository } from 'typeorm';
-
-//Português - Importa a entidade Notice.
 import { Notice } from './entities/notice.entity';
-
-//Português - Importa os DTOs de criação e atualização de recados.
+import { NoticeRead } from './entities/notice-read.entity';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { UpdateNoticeDto } from './dto/update-notice.dto';
-
-//Português - Importa a entidade User para associar o autor do aviso.
 import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class NoticesService {
-  //Português - Injeta o repositório TypeORM da tabela 'notices' no construtor.
   constructor(
     @InjectRepository(Notice)
     private readonly noticeRepository: Repository<Notice>,
+    @InjectRepository(NoticeRead)
+    private readonly noticeReadRepository: Repository<NoticeRead>,
   ) {}
 
-  //Português - Cria um novo recado vinculado ao usuário autenticado.
   async create(createNoticeDto: CreateNoticeDto, author: User): Promise<Notice> {
     const newNotice = this.noticeRepository.create({
       ...createNoticeDto,
-      //Português - Associa o autor automaticamente.
       author,
     });
-
     return await this.noticeRepository.save(newNotice);
   }
 
-  //Português - Lista todos os recados cadastrados, ordenados do mais recente para o mais antigo.
-  async findAll(): Promise<Notice[]> {
-    return await this.noticeRepository.find({
-      order: {
-        createdAt: 'DESC',
-      },
+  // Lista todos os recados e marca se o usuário autenticado já os leu
+  async findAll(userId?: number): Promise<any[]> {
+    const notices = await this.noticeRepository.find({
+      order: { createdAt: 'DESC' },
     });
+
+    if (!userId) {
+      return notices.map((n) => ({ ...n, isRead: false }));
+    }
+
+    // Busca quais avisos este usuário já leu
+    const userReads = await this.noticeReadRepository.find({
+      where: { user: { id: userId } },
+      relations: { notice: true },
+    });
+
+    const readNoticeIds = new Set(userReads.map((r) => r.notice?.id));
+
+    return notices.map((notice) => ({
+      ...notice,
+      isRead: readNoticeIds.has(notice.id),
+    }));
   }
 
-  //Português - Busca um recado específico pelo ID numérico.
   async findOne(id: number): Promise<Notice> {
     const notice = await this.noticeRepository.findOne({ where: { id } });
-
-    //Português - Lança erro HTTP 404 caso o recado não exista.
     if (!notice) {
       throw new NotFoundException(`Recado com ID ${id} não encontrado.`);
     }
-
     return notice;
   }
 
-  //Português - Atualiza as informações de um recado existente.
+  // Registra a leitura do recado no banco de dados
+  async markAsRead(noticeId: number, user: User): Promise<{ message: string }> {
+    const notice = await this.findOne(noticeId);
+
+    const existingRead = await this.noticeReadRepository.findOne({
+      where: {
+        notice: { id: notice.id },
+        user: { id: user.id },
+      },
+    });
+
+    if (!existingRead) {
+      const read = this.noticeReadRepository.create({ notice, user });
+      await this.noticeReadRepository.save(read);
+    }
+
+    return { message: 'Aviso marcado como lido com sucesso.' };
+  }
+
   async update(id: number, updateNoticeDto: UpdateNoticeDto): Promise<Notice> {
     const notice = await this.findOne(id);
     this.noticeRepository.merge(notice, updateNoticeDto);
     return await this.noticeRepository.save(notice);
   }
 
-  //Português - Remove um recado do banco de dados.
   async remove(id: number): Promise<{ message: string }> {
     const notice = await this.findOne(id);
     await this.noticeRepository.remove(notice);

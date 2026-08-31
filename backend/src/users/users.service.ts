@@ -70,9 +70,13 @@ export class UsersService {
     return user;
   }
 
-  //Português - Método de consulta por e-mail (Usado internamente pelo fluxo de login/JWT).
+  //Português - Método de consulta por e-mail (Usado internamente pelo fluxo de login/JWT, incluindo a senha para validação).
   async findByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { email } });
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
   }
 
   //Português - Método para atualizar informações de um usuário existente.

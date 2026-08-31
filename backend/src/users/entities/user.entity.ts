@@ -7,6 +7,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { UserRole } from '../enums/user-role.enum';
+
 //Português - Define que esta classe representa a tabela 'users' no banco de dados.
 @Entity('users')
 export class User {
@@ -22,13 +24,17 @@ export class User {
   @Column({ type: 'varchar', length: 150, unique: true })
   email: string;
 
-  //Português - Senha com * criptográfico.
-  @Column({ type: 'varchar', length: 255 })
+  //Português - Senha com hash criptográfico (Oculta por padrão nas consultas).
+  @Column({ type: 'varchar', length: 255, select: false })
   password: string;
 
   //Português - Papel do usuário no sistema (Exemplo: 'admin', 'user', 'supervisor').
-  @Column({ type: 'varchar', length: 50, default: 'user' })
-  role: string;
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
   //Português - Status de ativação da conta.
   @Column({ type: 'boolean', default: true })

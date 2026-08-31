@@ -8,10 +8,15 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 
-//Português - Importa os decorators do Swagger para documentação interativa.
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+//Português - Importa os decorators de autenticação, permissão e Swagger.
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from './enums/user-role.enum';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 //Português - Importa o serviço de usuários contendo as regras de negócio.
 import { UsersService } from './users.service';
@@ -20,8 +25,11 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-//Português - Agrupa todas as rotas deste controller na categoria "Users" dentro do Swagger.
+//Português - Agrupa todas as rotas deste controller na categoria "Users" dentro do Swagger e restringe ao perfil Admin.
 @ApiTags('Users')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles(UserRole.ADMIN)
 @Controller('users')
 export class UsersController {
   //Português - Injeta o serviço UsersService no construtor.

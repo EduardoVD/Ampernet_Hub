@@ -1,6 +1,6 @@
-//Português - Importa o NestFactory, responsável por instanciar a aplicação NestJS.
+//Português - Importa o NestFactory do Core e o ValidationPipe do Common.
 import { NestFactory } from '@nestjs/core';
-
+import { ValidationPipe } from '@nestjs/common';
 //Português - Importa o módulo raiz da aplicação contendo as importações dos outros módulos.
 import { AppModule } from './app.module';
 
@@ -10,6 +10,16 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   //Português - Cria a instância principal da aplicação HTTP baseada no AppModule.
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors();
+
+  //Português - Ativa a validação global de DTOs descartando propriedades não declaradas (whitelist).
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   //Português - Instancia e configura o construtor de documentação da API.
   const config = new DocumentBuilder()

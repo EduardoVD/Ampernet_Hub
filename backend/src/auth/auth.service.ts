@@ -21,9 +21,13 @@ export class AuthService {
     //Português - Busca o usuário pelo e-mail informado.
     const user = await this.usersService.findByEmail(loginDto.email);
 
-    //Português - Valida se o usuário existe.
+    //Português - Valida se o usuário existe e se a conta está ativa.
     if (!user) {
       throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Conta de usuário inativa. Procure o administrador.');
     }
 
     //Português - Compara a senha informada com o hash salvo no banco via Bcrypt.
