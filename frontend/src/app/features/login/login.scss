@@ -1,0 +1,268 @@
+// ==========================================
+// VARIÁVEIS DE CORES E FONTES
+// ==========================================
+$purple-primary: #5c1bc4;
+$purple-light: #7c3aed;
+$purple-deep: #311068;
+$dark-bg: #13171f;
+$input-bg: rgba(37, 45, 61, 0.7);
+$input-focus: #283347;
+$text-light: #ffffff;
+$text-muted: #94a3b8;
+
+$font-title: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+$font-body: 'Cambria', 'Georgia', serif;
+
+// ==========================================
+// ESTRUTURA PRINCIPAL
+// ==========================================
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: $dark-bg;
+  font-family: $font-body;
+  overflow: hidden;
+
+  // ----------------------------------------
+  // LADO ESQUERDO: PAINEL INSTITUCIONAL
+  // ----------------------------------------
+  .branding-panel {
+    flex: 1.1;
+    background: linear-gradient(135deg, $purple-light 0%, $purple-primary 55%, $purple-deep 100%);
+    padding: 4.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: $text-light;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -15%;
+      right: -15%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 65%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -10%;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .brand-header {
+      position: relative;
+      z-index: 1;
+
+      .brand-title {
+        font-family: $font-title;
+        font-size: 2.75rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        margin-bottom: 0.85rem;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .brand-subtitle {
+        font-family: $font-body;
+        font-size: 1.2rem;
+        font-style: italic;
+        opacity: 0.92;
+        max-width: 400px;
+        line-height: 1.6;
+      }
+    }
+
+    .features-list {
+      position: relative;
+      z-index: 1;
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        font-family: $font-body;
+        font-size: 1.15rem;
+
+        .icon {
+          font-family: $font-title;
+          font-size: 1.1rem;
+          color: rgba(255, 255, 255, 0.9);
+          filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+        }
+      }
+    }
+
+    .brand-footer {
+      position: relative;
+      z-index: 1;
+      font-family: $font-body;
+      font-size: 0.95rem;
+      opacity: 0.75;
+    }
+  }
+
+  // ----------------------------------------
+  // LADO DIREITO: FORMULÁRIO ESCURO
+  // ----------------------------------------
+  .form-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    background: radial-gradient(circle at 80% 20%, #1f2736 0%, $dark-bg 100%);
+    position: relative;
+
+    .form-content {
+      width: 100%;
+      max-width: 420px;
+      z-index: 1;
+
+      .form-header {
+        margin-bottom: 2.5rem;
+
+        h2 {
+          font-family: $font-title;
+          color: $text-light;
+          font-size: 2.1rem;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          margin-bottom: 0.4rem;
+        }
+
+        p {
+          font-family: $font-body;
+          color: $text-muted;
+          font-size: 1.05rem;
+          font-style: italic;
+        }
+      }
+
+      .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.6rem;
+
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.55rem;
+
+          label {
+            font-family: $font-body;
+            color: $text-light;
+            font-size: 1rem;
+            letter-spacing: 0.02em;
+          }
+
+.input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+
+            .prefix-icon {
+              position: absolute;
+              left: 1rem;
+              z-index: 2;
+              display: block;
+              pointer-events: none;
+            }
+
+            input {
+              width: 100%;
+              background-color: $input-bg;
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              border-radius: 12px;
+              padding: 0.95rem 3rem 0.95rem 3rem;
+              color: $text-light;
+              font-family: $font-body;
+              font-size: 1.05rem;
+              outline: none;
+              backdrop-filter: blur(8px);
+              transition: all 0.25s ease;
+
+              &:focus {
+                border-color: $purple-light;
+                background-color: $input-focus;
+                box-shadow: 0 0 16px rgba(124, 58, 237, 0.3);
+              }
+
+              &::placeholder {
+                color: #64748b;
+                font-family: $font-body;
+              }
+            }
+
+            .suffix-btn {
+              position: absolute;
+              right: 1rem;
+              z-index: 2;
+              background: none;
+              border: none;
+              cursor: pointer;
+              padding: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              &:hover svg {
+                stroke: $text-light;
+              }
+            }
+          }
+        }
+
+        .submit-btn {
+          margin-top: 1rem;
+          background: linear-gradient(135deg, $purple-light 0%, $purple-primary 100%);
+          color: $text-light;
+          border: none;
+          padding: 1rem;
+          border-radius: 12px;
+          font-family: $font-title;
+          font-size: 1.05rem;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          cursor: pointer;
+          box-shadow: 0 6px 20px rgba(108, 43, 217, 0.35);
+          transition: all 0.25s ease;
+
+          &:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+            filter: brightness(1.08);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+          }
+
+          &:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+          }
+        }
+      }
+    }
+  }
+}

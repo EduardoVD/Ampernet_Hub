@@ -1,0 +1,133 @@
+<div class="dashboard-page">
+  <!-- 1. Registro de Problemas Gerais -->
+  <section class="section-card issues-section">
+      <header class="section-banner">
+        <h2>REGISTRO DE PROBLEMAS GERAIS</h2>
+      </header>
+      <div class="section-body issues-scroll">
+        <div *ngIf="issues().length === 0" class="empty-state">
+          <p>Nenhum problema em aberto no momento.</p>
+        </div>
+        <div *ngIf="issues().length > 0" class="issues-grid">
+          <div
+            *ngFor="let issue of issues()"
+            class="issue-card"
+            [ngClass]="issue.status"
+            (click)="openIssueModal(issue)"
+            title="Clique para visualizar os detalhes"
+          >
+            <span class="badge">{{ issue.status === 'ongoing' ? 'Problema Ocorrendo' : 'Problema Resolvido' }}</span>
+            <h3>{{ issue.title }}</h3>
+            <p class="card-desc-preview">{{ issue.description }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid Inferior -->
+    <div class="content-grid">
+      <!-- 2. Recados e Avisos -->
+      <section class="section-card notices-section">
+        <header class="section-banner">
+          <h2>RECADOS E AVISOS</h2>
+        </header>
+        <div class="section-body notices-scroll">
+          <div *ngIf="notices().length === 0" class="empty-state">
+            <p>Nenhum recado de momento.</p>
+          </div>
+          <div *ngIf="notices().length > 0" class="notices-list">
+            <article
+              *ngFor="let notice of notices()"
+              class="notice-card"
+              (click)="openNoticeModal(notice)"
+              title="Clique para abrir o recado"
+            >
+              <h3>{{ notice.title }}</h3>
+              <p class="notice-text">{{ notice.description }}</p>
+              <span *ngIf="notice.read" class="read-tag">✓ Lida</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Matriz de Responsabilidades -->
+      <section class="section-card matrix-section">
+        <header class="section-banner">
+          <h2>MATRIZ DINÂMICA DE RESPONSABILIDADES POR CIDADE</h2>
+        </header>
+        <div class="section-body">
+          <div class="filters-bar">
+            <div class="filter-group">
+              <label>Cidade:</label>
+              <input
+                type="text"
+                [ngModel]="cityFilter()"
+                (ngModelChange)="cityFilter.set($event)"
+                placeholder="Filtrar por cidade..."
+              />
+            </div>
+            <div class="filter-group">
+              <label>Setor:</label>
+              <input
+                type="text"
+                [ngModel]="sectorFilter()"
+                (ngModelChange)="sectorFilter.set($event)"
+                placeholder="Filtrar por setor..."
+              />
+            </div>
+          </div>
+
+          <div class="table-scroll-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SETOR</th>
+                  <th>CIDADE</th>
+                  <th>RESPONSÁVEL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of filteredResponsibilities()">
+                  <td>{{ row.sector }}</td>
+                  <td>{{ row.city }}</td>
+                  <td>{{ row.responsible }}</td>
+                </tr>
+                <tr *ngIf="filteredResponsibilities().length === 0">
+                  <td colspan="3" class="table-empty">Nenhum registro encontrado para os filtros informados.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  <!-- MODAL COM ANIMAÇÃO FADE-IN -->
+  <div *ngIf="activeModal()" class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <span *ngIf="activeModal()?.badge" class="modal-badge" [ngClass]="activeModal()?.statusClass">
+          {{ activeModal()?.badge }}
+        </span>
+        <h3>{{ activeModal()?.title }}</h3>
+        <button class="modal-close-btn" (click)="closeModal()">✕</button>
+      </header>
+
+      <div class="modal-body">
+        <p>{{ activeModal()?.description }}</p>
+      </div>
+
+      <footer class="modal-footer">
+        <button
+          *ngIf="activeModal()?.noticeId && !activeModal()?.isRead"
+          class="action-btn"
+          (click)="markNoticeAsRead(activeModal()!.noticeId!)"
+        >
+          ✓ MARCAR COMO LIDA
+        </button>
+        <span *ngIf="activeModal()?.noticeId && activeModal()?.isRead" class="read-tag-modal">✓ Aviso Lido</span>
+        <button class="btn-secondary" (click)="closeModal()">Fechar</button>
+      </footer>
+    </div>
+  </div>
+</div>

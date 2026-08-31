@@ -1,0 +1,492 @@
+// ==========================================
+// VARIÁVEIS DE CORES E FONTES
+// ==========================================
+$purple-primary: #5c1bc4;
+$purple-light: #7c3aed;
+$dark-bg: #141822;
+$card-bg: #1c2230;
+$input-bg: #283144;
+$text-light: #ffffff;
+$text-muted: #94a3b8;
+$font-title: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+$font-body: 'Cambria', 'Georgia', serif;
+
+// ==========================================
+// MIXIN: OCULTA BARRA DE ROLAGEM MANTENDO SCROLL
+// ==========================================
+@mixin hide-scrollbar {
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE/Edge
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari e Edge
+    width: 0;
+    height: 0;
+  }
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+// ==========================================
+// ESTRUTURA PRINCIPAL
+// ==========================================
+.dashboard-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  .section-card {
+      background-color: $card-bg;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      .section-banner {
+        background: linear-gradient(90deg, $purple-primary 0%, $purple-light 100%);
+        padding: 0.65rem 1rem;
+        text-align: center;
+        flex-shrink: 0;
+
+        h2 {
+          font-family: $font-title;
+          font-size: 0.85rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+        }
+      }
+
+      .section-body {
+        padding: 1.25rem;
+        min-width: 0;
+      }
+    }
+
+    // ----------------------------------------
+    // 1. REGISTRO DE PROBLEMAS GERAIS
+    // ----------------------------------------
+.issues-section {
+      height: 215px; // Altura expandida para dar respiro
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 100%;
+
+      .issues-scroll {
+        flex: 1;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 1.25rem 1.25rem 1.5rem 1.25rem; // Margem inferior aumentada
+        box-sizing: border-box;
+        display: flex;
+        align-items: center; // Centraliza os cards no espaço vertical
+        @include hide-scrollbar;
+
+        .issues-grid {
+          display: inline-flex;
+          flex-wrap: nowrap;
+          gap: 1.15rem;
+          align-items: stretch;
+
+          .issue-card {
+            width: 290px;
+            min-width: 290px;
+            max-width: 290px;
+            height: 125px; // Altura fixa e proporcional para o card
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 0.95rem 1rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+
+            &:hover {
+              transform: translateY(-2px);
+              border-color: $purple-light;
+            }
+
+            .badge {
+              align-self: flex-start;
+              font-size: 0.75rem;
+              padding: 0.25rem 0.6rem;
+              border-radius: 4px;
+              font-family: $font-title;
+              margin-bottom: 0.5rem;
+            }
+
+            &.ongoing .badge {
+              background: rgba(239, 68, 68, 0.2);
+              color: #ef4444;
+            }
+
+            &.resolved .badge {
+              background: rgba(34, 197, 94, 0.2);
+              color: #22c55e;
+            }
+
+            h3 {
+              font-family: $font-title;
+              font-size: 0.92rem;
+              margin: 0 0 0.35rem 0;
+              white-space: normal;
+              word-break: break-word;
+            }
+
+            .card-desc-preview {
+              font-family: $font-body;
+              font-size: 0.88rem;
+              color: $text-muted;
+              line-height: 1.35;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              white-space: normal;
+              margin: 0;
+            }
+          }
+        }
+      }
+    }
+
+    // ----------------------------------------
+    // GRID INFERIOR (RECADOS + MATRIZ)
+    // ----------------------------------------
+    .content-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.25rem;
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+
+      // 2. Recados e Avisos
+      .notices-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+
+        .notices-scroll {
+          flex: 1;
+          min-height: 0;
+          overflow-y: auto;
+          padding: 1.25rem;
+          @include hide-scrollbar; // Oculta a barra vertical dos recados
+
+          .notices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+            .notice-card {
+              background: rgba(255, 255, 255, 0.03);
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              border-radius: 10px;
+              padding: 1rem;
+              cursor: pointer;
+              transition: all 0.2s ease;
+
+              &:hover {
+                border-color: $purple-light;
+              }
+
+              h3 {
+                font-family: $font-title;
+                font-size: 0.95rem;
+                margin-bottom: 0.5rem;
+              }
+
+              .notice-text {
+                font-family: $font-body;
+                font-size: 0.92rem;
+                color: $text-muted;
+                line-height: 1.4;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              }
+
+              .read-tag {
+                color: #22c55e;
+                font-family: $font-title;
+                font-size: 0.8rem;
+                font-weight: 600;
+                margin-top: 0.5rem;
+                display: inline-block;
+              }
+            }
+          }
+        }
+      }
+
+      // 3. Matriz Dinâmica de Responsabilidades
+      .matrix-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+
+        .section-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          min-height: 0;
+          padding: 1.25rem;
+        }
+
+        .filters-bar {
+          display: flex;
+          gap: 2rem;
+          margin-bottom: 1rem;
+          flex-shrink: 0;
+
+          .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            label {
+              font-family: $font-body;
+              font-size: 0.95rem;
+              color: $text-muted;
+            }
+
+            input {
+              background-color: $input-bg;
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              border-radius: 8px;
+              padding: 0.5rem 0.85rem;
+              color: $text-light;
+              font-family: $font-body;
+              font-size: 0.95rem;
+              outline: none;
+
+              &:focus {
+                border-color: $purple-light;
+              }
+            }
+          }
+        }
+
+        .table-scroll-container {
+          flex: 1;
+          overflow-y: auto;
+          @include hide-scrollbar; // Oculta a barra da tabela
+
+          .data-table {
+            width: 100%;
+            border-collapse: collapse;
+
+            thead th {
+              position: sticky;
+              top: 0;
+              background-color: #241c38;
+              color: $purple-light;
+              font-family: $font-title;
+              font-size: 0.8rem;
+              text-align: left;
+              padding: 0.75rem 1rem;
+              z-index: 1;
+            }
+
+            tbody td {
+              padding: 0.85rem 1rem;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+              font-family: $font-body;
+              font-size: 0.95rem;
+            }
+
+            .table-empty {
+              text-align: center;
+              color: $text-muted;
+              padding: 2rem;
+              font-style: italic;
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 60px;
+      color: $text-muted;
+      font-family: $font-body;
+      font-style: italic;
+      font-size: 1rem;
+    }
+  }
+
+  // ==========================================
+  // MODAL COM ANIMAÇÃO FADE-IN
+  // ==========================================
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.25s ease-out;
+
+    .modal-card {
+      background-color: $card-bg;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 520px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: scaleUp 0.25s ease-out;
+
+      .modal-header {
+        background: linear-gradient(90deg, rgba($purple-primary, 0.4) 0%, rgba($purple-light, 0.2) 100%);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+        .modal-badge {
+          font-size: 0.75rem;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          font-family: $font-title;
+
+          &.ongoing {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+          }
+          &.resolved {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+          }
+        }
+
+        h3 {
+          font-family: $font-title;
+          font-size: 1.1rem;
+          margin: 0;
+          flex: 1;
+          margin-left: 0.75rem;
+        }
+
+        .modal-close-btn {
+          background: none;
+          border: none;
+          color: $text-muted;
+          font-size: 1.2rem;
+          cursor: pointer;
+          &:hover {
+            color: $text-light;
+          }
+        }
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        max-height: 350px;
+        overflow-y: auto;
+        @include hide-scrollbar; // Oculta barra do modal também
+
+        p {
+          font-family: $font-body;
+          font-size: 1.05rem;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.9);
+        }
+      }
+
+      .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 0.75rem;
+
+        .read-tag-modal {
+          color: #22c55e;
+          font-family: $font-title;
+          font-size: 0.85rem;
+          font-weight: 600;
+          margin-right: auto;
+        }
+
+        .action-btn {
+          background-color: $purple-light;
+          color: $text-light;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          font-family: $font-title;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .btn-secondary {
+          background: rgba(255, 255, 255, 0.1);
+          color: $text-light;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          font-family: $font-title;
+          font-size: 0.85rem;
+          cursor: pointer;
+          &:hover {
+            background: rgba(255, 255, 255, 0.15);
+          }
+        }
+      }
+    }
+  }
+
+
+// KEYFRAMES DE ENTRADA SUAVE
+// KEYFRAMES DE ENTRADA SUAVE
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
