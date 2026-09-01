@@ -1,22 +1,9 @@
-//Português - Importa os decorators de injeção de dependência e exceções HTTP padrão do NestJS.
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-
-//Português - Importa o decorator para injetar o repositório específico da entidade User.
 import { InjectRepository } from '@nestjs/typeorm';
-
-//Português - Importa a interface de Repositório padrão do TypeORM.
 import { Repository } from 'typeorm';
-
-//Português - Importa a biblioteca bcrypt para criptografia unidirecional de senhas.
 import * as bcrypt from 'bcrypt';
-
-//Português - Importa a entidade User mapeada para a tabela no banco de dados.
 import { User } from './entities/user.entity';
-
-//Português - Importa o DTO com a estrutura dos dados recebidos no cadastro.
 import { CreateUserDto } from './dto/create-user.dto';
-
-//Português - Importa o DTO com a estrutura dos dados para atualização de usuário.
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()

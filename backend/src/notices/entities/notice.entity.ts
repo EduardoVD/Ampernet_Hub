@@ -1,4 +1,3 @@
-//Português - Importa os decorators do TypeORM para mapeamento e relacionamentos.
 import {
   Entity,
   PrimaryGeneratedColumn,

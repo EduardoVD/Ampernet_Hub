@@ -1,10 +1,5 @@
-//Português - Importa o decorator @Module do NestJS para definir a estrutura do módulo.
 import { Module } from '@nestjs/common';
-
-//Português - Importa o módulo oficial do TypeORM integrado ao NestJS.
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-//Português - Importa o service básico gerado pelo NestJS.
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { NoticesModule } from './notices/notices.module';

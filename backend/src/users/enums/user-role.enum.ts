@@ -1,4 +1,4 @@
-//Portugu�s - Enum com os pap�is e n�veis de acesso oficiais do sistema.
+//Português - Enum com os papéis e níveis de acesso oficiais do sistema.
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',

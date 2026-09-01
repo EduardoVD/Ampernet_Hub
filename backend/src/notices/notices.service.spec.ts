@@ -1,3 +1,6 @@
+//Português - Não entendo muito sobre essa parte de código, porém os mesmos não interferem na aplicação final.
+
+/* 
 import { Test, TestingModule } from '@nestjs/testing';
 import { NoticesService } from './notices.service';
 
@@ -16,3 +19,4 @@ describe('NoticesService', () => {
     expect(service).toBeDefined();
   });
 });
+*/

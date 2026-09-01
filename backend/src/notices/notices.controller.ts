@@ -12,7 +12,6 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 
-//Português - Importa o guard de autenticação do Passport e o guard de papéis/permissões.
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -74,6 +73,7 @@ export class NoticesController {
   //Português - Rota PATCH /notices/:id: Edição de aviso existente (Requer autenticação JWT).
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN, UserRole.SUPERVISOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizar informações de um recado' })
   @ApiResponse({ status: 200, description: 'Recado atualizado com sucesso.' })

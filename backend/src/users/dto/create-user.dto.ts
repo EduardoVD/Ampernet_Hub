@@ -1,4 +1,3 @@
-//Português - Importa o decorator do Swagger e os validadores de dados.
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { UserRole } from '../enums/user-role.enum';
@@ -32,7 +31,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'A senha é obrigatória' })
   password!: string;
 
-  //Português - Documenta o nível de acesso (Opcional no cadastro).
+  //Português - Documenta o nível de acesso.
   @ApiProperty({
     description: 'Papel do usuário no sistema',
     enum: UserRole,

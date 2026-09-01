@@ -24,7 +24,7 @@ export class NoticesService {
     return await this.noticeRepository.save(newNotice);
   }
 
-  // Lista todos os recados e marca se o usuário autenticado já os leu
+  //Português - Lista todos os recados e marca se o usuário autenticado já os leu.
   async findAll(userId?: number): Promise<any[]> {
     const notices = await this.noticeRepository.find({
       order: { createdAt: 'DESC' },
@@ -34,7 +34,7 @@ export class NoticesService {
       return notices.map((n) => ({ ...n, isRead: false }));
     }
 
-    // Busca quais avisos este usuário já leu
+    //Português - Busca quais avisos este usuário já leu.
     const userReads = await this.noticeReadRepository.find({
       where: { user: { id: userId } },
       relations: { notice: true },
@@ -56,7 +56,7 @@ export class NoticesService {
     return notice;
   }
 
-  // Registra a leitura do recado no banco de dados
+  //Português - Registra a leitura do recado no banco de dados.
   async markAsRead(noticeId: number, user: User): Promise<{ message: string }> {
     const notice = await this.findOne(noticeId);
 

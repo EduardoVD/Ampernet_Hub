@@ -1,10 +1,6 @@
-//Português - Importa o NestFactory do Core e o ValidationPipe do Common.
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-//Português - Importa o módulo raiz da aplicação contendo as importações dos outros módulos.
 import { AppModule } from './app.module';
-
-//Português -Importa os utilitários de configuração e geração do Swagger/OpenAPI.
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 //Português - Função assíncrona principal que inicializa o ciclo de vida do servidor.
 async function bootstrap() {

@@ -1,4 +1,3 @@
-//Português - Importa os decorators do Swagger e de validação de dados.
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 

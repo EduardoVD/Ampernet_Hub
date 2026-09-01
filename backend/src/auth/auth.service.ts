@@ -1,9 +1,6 @@
-//Português - Importa decorators e exceções HTTP.
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-
-//Português - Importa o serviço de usuários e o DTO de login.
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 
@@ -16,28 +13,28 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  //Português - Método de autenticação e geração de token.
+  //Português - Método de autenticação e geração de Token.
   async login(loginDto: LoginDto) {
     //Português - Busca o usuário pelo e-mail informado.
     const user = await this.usersService.findByEmail(loginDto.email);
 
     //Português - Valida se o usuário existe e se a conta está ativa.
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas.');
+      throw new UnauthorizedException('Credenciais Inválidas!');
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Conta de usuário inativa. Procure o administrador.');
+      throw new UnauthorizedException('Conta de usuário inativa! Procure o administrador.');
     }
 
     //Português - Compara a senha informada com o hash salvo no banco via Bcrypt.
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciais inválidas.');
+      throw new UnauthorizedException('Credenciais Inválidas');
     }
 
-    //Português - Monta o payload contendo as claims de identificação e permissão.
+    //Português - Monta o Payload contendo as informações de identificação e permissão.
     const payload = {
       sub: user.id,
       email: user.email,
@@ -45,7 +42,7 @@ export class AuthService {
       role: user.role,
     };
 
-    //Português - Retorna o token assinado e as informações básicas do colaborador.
+    //Português - Retorna o Token assinado e as informações básicas do colaborador.
     return {
       accessToken: this.jwtService.sign(payload),
       user: {

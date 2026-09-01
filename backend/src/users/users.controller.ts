@@ -32,7 +32,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Roles(UserRole.ADMIN)
 @Controller('users')
 export class UsersController {
-  //Português - Injeta o serviço UsersService no construtor.
+  //Português - Injeta o serviço "UsersService" no construtor.
   constructor(private readonly usersService: UsersService) {}
 
   //Português - Rota POST /users: Criação de um novo usuário.

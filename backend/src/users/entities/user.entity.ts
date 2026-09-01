@@ -28,7 +28,7 @@ export class User {
   @Column({ type: 'varchar', length: 255, select: false })
   password: string;
 
-  //Português - Papel do usuário no sistema (Exemplo: 'admin', 'user', 'supervisor').
+  //Português - Papel do usuário no sistema (Exemplo: 'user', 'admin', 'supervisor').
   @Column({
     type: 'enum',
     enum: UserRole,
