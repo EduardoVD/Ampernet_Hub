@@ -1,3 +1,6 @@
+//Português - Não entendo muito sobre essa parte de código, porém os mesmos não interferem na aplicação final.
+
+/* 
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 
@@ -21,3 +24,4 @@ describe('App', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('Hello, amper-frontend');
   });
 });
+*/

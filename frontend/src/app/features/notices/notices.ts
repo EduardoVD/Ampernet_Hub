@@ -29,13 +29,11 @@ export class NoticesComponent implements OnInit {
   currentUser = this.authService.currentUser;
   notices = signal<NoticeDetail[]>([]);
 
-  // Permissão: Apenas Admin e Supervisor podem criar e excluir avisos
   canManageNotices = computed(() => {
     const role = this.currentUser()?.role;
     return role === 'admin' || role === 'supervisor';
   });
 
-  // Estado do Modal de Criação de Aviso
   isCreateModalOpen = signal(false);
   newNoticeTitle = signal('');
   newNoticeCategory = signal('Geral');

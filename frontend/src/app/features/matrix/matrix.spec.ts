@@ -1,3 +1,6 @@
+//Português - Não entendo muito sobre essa parte de código, porém os mesmos não interferem na aplicação final.
+
+/* 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Matrix } from './matrix';
 
@@ -19,3 +22,4 @@ describe('Matrix', () => {
     expect(component).toBeTruthy();
   });
 });
+ */

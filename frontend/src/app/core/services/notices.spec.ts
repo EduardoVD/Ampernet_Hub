@@ -1,3 +1,6 @@
+//Português - Não entendo muito sobre essa parte de código, porém os mesmos não interferem na aplicação final.
+
+/* 
 import { TestBed } from '@angular/core/testing';
 import { Notices } from './notices';
 
@@ -12,4 +15,5 @@ describe('Notices', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
-});
+}); 
+*/

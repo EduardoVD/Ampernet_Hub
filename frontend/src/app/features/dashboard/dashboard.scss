@@ -1,6 +1,4 @@
-// ==========================================
-// VARIÁVEIS DE CORES E FONTES
-// ==========================================
+
 $purple-primary: #5c1bc4;
 $purple-light: #7c3aed;
 $dark-bg: #141822;
@@ -11,15 +9,12 @@ $text-muted: #94a3b8;
 $font-title: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 $font-body: 'Cambria', 'Georgia', serif;
 
-// ==========================================
-// MIXIN: OCULTA BARRA DE ROLAGEM MANTENDO SCROLL
-// ==========================================
 @mixin hide-scrollbar {
-  scrollbar-width: none; // Firefox
-  -ms-overflow-style: none; // IE/Edge
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
 
   &::-webkit-scrollbar {
-    display: none; // Chrome, Safari e Edge
+    display: none;
     width: 0;
     height: 0;
   }
@@ -34,9 +29,6 @@ $font-body: 'Cambria', 'Georgia', serif;
   overflow: hidden;
 }
 
-// ==========================================
-// ESTRUTURA PRINCIPAL
-// ==========================================
 .dashboard-page {
   flex: 1;
   display: flex;
@@ -74,11 +66,8 @@ $font-body: 'Cambria', 'Georgia', serif;
       }
     }
 
-    // ----------------------------------------
-    // 1. REGISTRO DE PROBLEMAS GERAIS
-    // ----------------------------------------
 .issues-section {
-      height: 215px; // Altura expandida para dar respiro
+      height: 215px; 
       flex-shrink: 0;
       width: 100%;
       max-width: 100%;
@@ -89,10 +78,10 @@ $font-body: 'Cambria', 'Georgia', serif;
         max-width: 100%;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 1.25rem 1.25rem 1.5rem 1.25rem; // Margem inferior aumentada
+        padding: 1.25rem 1.25rem 1.5rem 1.25rem;
         box-sizing: border-box;
         display: flex;
-        align-items: center; // Centraliza os cards no espaço vertical
+        align-items: center; 
         @include hide-scrollbar;
 
         .issues-grid {
@@ -105,7 +94,7 @@ $font-body: 'Cambria', 'Georgia', serif;
             width: 290px;
             min-width: 290px;
             max-width: 290px;
-            height: 125px; // Altura fixa e proporcional para o card
+            height: 125px; 
             flex-shrink: 0;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -167,9 +156,6 @@ $font-body: 'Cambria', 'Georgia', serif;
       }
     }
 
-    // ----------------------------------------
-    // GRID INFERIOR (RECADOS + MATRIZ)
-    // ----------------------------------------
     .content-grid {
       display: grid;
       grid-template-columns: 360px 1fr;
@@ -178,7 +164,6 @@ $font-body: 'Cambria', 'Georgia', serif;
       min-height: 0;
       min-width: 0;
 
-      // 2. Recados e Avisos
       .notices-section {
         display: flex;
         flex-direction: column;
@@ -190,7 +175,7 @@ $font-body: 'Cambria', 'Georgia', serif;
           min-height: 0;
           overflow-y: auto;
           padding: 1.25rem;
-          @include hide-scrollbar; // Oculta a barra vertical dos recados
+          @include hide-scrollbar;
 
           .notices-list {
             display: flex;
@@ -239,7 +224,6 @@ $font-body: 'Cambria', 'Georgia', serif;
         }
       }
 
-      // 3. Matriz Dinâmica de Responsabilidades
       .matrix-section {
         display: flex;
         flex-direction: column;
@@ -291,7 +275,7 @@ $font-body: 'Cambria', 'Georgia', serif;
         .table-scroll-container {
           flex: 1;
           overflow-y: auto;
-          @include hide-scrollbar; // Oculta a barra da tabela
+          @include hide-scrollbar; 
 
           .data-table {
             width: 100%;
@@ -340,9 +324,6 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
   }
 
-  // ==========================================
-  // MODAL COM ANIMAÇÃO FADE-IN
-  // ==========================================
   .modal-backdrop {
     position: fixed;
     top: 0;
@@ -417,7 +398,7 @@ $font-body: 'Cambria', 'Georgia', serif;
         padding: 1.5rem;
         max-height: 350px;
         overflow-y: auto;
-        @include hide-scrollbar; // Oculta barra do modal também
+        @include hide-scrollbar;
 
         p {
           font-family: $font-body;
@@ -472,9 +453,6 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
   }
 
-
-// KEYFRAMES DE ENTRADA SUAVE
-// KEYFRAMES DE ENTRADA SUAVE
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

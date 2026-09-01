@@ -1,5 +1,4 @@
 <div class="login-wrapper">
-  <!-- Lado Esquerdo Institucional -->
   <aside class="branding-panel">
     <div class="brand-header">
       <h1 class="brand-title">AMPERNET</h1>
@@ -17,7 +16,6 @@
     </footer>
   </aside>
 
-  <!-- Lado Direito Formulário -->
   <main class="form-panel">
     <div class="form-content">
       <header class="form-header">
@@ -26,7 +24,6 @@
       </header>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <!-- Campo E-mail -->
         <div class="input-group">
           <label for="email">Seu E-mail</label>
           <div class="input-wrapper">
@@ -43,7 +40,6 @@
           </div>
         </div>
 
-        <!-- Campo Senha -->
         <div class="input-group">
           <label for="password">Sua Senha</label>
           <div class="input-wrapper">
@@ -63,12 +59,11 @@
               (click)="togglePasswordVisibility()"
               title="Alternar visualização da senha"
             >
-              <!-- Ícone Olho Aberto -->
               <svg *ngIf="!showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
-              <!-- Ícone Olho Fechado -->
+
               <svg *ngIf="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m15 18-.722-3.25"/>
                 <path d="M2 8a10.645 10.645 0 0 0 20 0"/>

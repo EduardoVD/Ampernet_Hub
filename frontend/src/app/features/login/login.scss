@@ -1,6 +1,3 @@
-// ==========================================
-// VARIÁVEIS DE CORES E FONTES
-// ==========================================
 $purple-primary: #5c1bc4;
 $purple-light: #7c3aed;
 $purple-deep: #311068;
@@ -13,9 +10,6 @@ $text-muted: #94a3b8;
 $font-title: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 $font-body: 'Cambria', 'Georgia', serif;
 
-// ==========================================
-// ESTRUTURA PRINCIPAL
-// ==========================================
 .login-wrapper {
   display: flex;
   height: 100vh;
@@ -24,9 +18,6 @@ $font-body: 'Cambria', 'Georgia', serif;
   font-family: $font-body;
   overflow: hidden;
 
-  // ----------------------------------------
-  // LADO ESQUERDO: PAINEL INSTITUCIONAL
-  // ----------------------------------------
   .branding-panel {
     flex: 1.1;
     background: linear-gradient(135deg, $purple-light 0%, $purple-primary 55%, $purple-deep 100%);
@@ -119,9 +110,6 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
   }
 
-  // ----------------------------------------
-  // LADO DIREITO: FORMULÁRIO ESCURO
-  // ----------------------------------------
   .form-panel {
     flex: 1;
     display: flex;

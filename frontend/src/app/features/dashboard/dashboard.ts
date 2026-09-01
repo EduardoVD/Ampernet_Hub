@@ -44,7 +44,6 @@ export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private noticesService = inject(NoticesService);
 
-  // Usuário autenticado vindo do backend
   currentUser = this.authService.currentUser;
 
   cityFilter = signal('');
@@ -83,7 +82,7 @@ export class DashboardComponent implements OnInit {
           id: String(item.id),
           title: item.title,
           description: item.content || '',
-          read: item.isRead // ✅ Vem direto do banco de dados
+          read: item.isRead
         }));
         this.notices.set(formatted);
       },
@@ -94,7 +93,6 @@ export class DashboardComponent implements OnInit {
   markNoticeAsRead(id: string): void {
     this.noticesService.markAsRead(id).subscribe({
       next: () => {
-        // Atualiza a tela em tempo real
         this.notices.update(items =>
           items.map(n => (n.id === id ? { ...n, read: true } : n))
         );

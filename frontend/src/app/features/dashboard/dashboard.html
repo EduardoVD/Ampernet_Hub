@@ -1,5 +1,4 @@
 <div class="dashboard-page">
-  <!-- 1. Registro de Problemas Gerais -->
   <section class="section-card issues-section">
       <header class="section-banner">
         <h2>REGISTRO DE PROBLEMAS GERAIS</h2>
@@ -24,9 +23,7 @@
       </div>
     </section>
 
-    <!-- Grid Inferior -->
     <div class="content-grid">
-      <!-- 2. Recados e Avisos -->
       <section class="section-card notices-section">
         <header class="section-banner">
           <h2>RECADOS E AVISOS</h2>
@@ -50,7 +47,6 @@
         </div>
       </section>
 
-      <!-- 3. Matriz de Responsabilidades -->
       <section class="section-card matrix-section">
         <header class="section-banner">
           <h2>MATRIZ DINÂMICA DE RESPONSABILIDADES POR CIDADE</h2>
@@ -102,7 +98,6 @@
       </section>
     </div>
 
-  <!-- MODAL COM ANIMAÇÃO FADE-IN -->
   <div *ngIf="activeModal()" class="modal-backdrop" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
