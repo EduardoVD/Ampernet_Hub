@@ -38,6 +38,7 @@ export class NoticesComponent implements OnInit {
   newNoticeTitle = signal('');
   newNoticeCategory = signal('Geral');
   newNoticeContent = signal('');
+  editingNoticeId = signal<string | null>(null);
   isSubmitting = signal(false);
 
   ngOnInit(): void {
@@ -89,14 +90,27 @@ export class NoticesComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    this.editingNoticeId.set(null);
     this.newNoticeTitle.set('');
     this.newNoticeCategory.set('Geral');
     this.newNoticeContent.set('');
     this.isCreateModalOpen.set(true);
   }
 
+  openEditModal(notice: NoticeDetail, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.editingNoticeId.set(notice.id);
+    this.newNoticeTitle.set(notice.title);
+    this.newNoticeCategory.set(notice.category);
+    this.newNoticeContent.set(notice.description);
+    this.isCreateModalOpen.set(true);
+  }
+
   closeCreateModal(): void {
     this.isCreateModalOpen.set(false);
+    this.editingNoticeId.set(null);
   }
 
   submitCreateNotice(): void {
@@ -106,22 +120,41 @@ export class NoticesComponent implements OnInit {
     }
 
     this.isSubmitting.set(true);
-    this.noticesService.createNotice({
+    const id = this.editingNoticeId();
+
+    const payload = {
       title: this.newNoticeTitle().trim(),
       content: this.newNoticeContent().trim(),
       category: this.newNoticeCategory().trim() || 'Geral'
-    }).subscribe({
-      next: () => {
-        this.isSubmitting.set(false);
-        this.closeCreateModal();
-        this.loadNotices();
-      },
-      error: (err: any) => {
-        this.isSubmitting.set(false);
-        console.error('Erro ao cadastrar novo aviso:', err);
-        alert('Erro ao publicar aviso. Verifique suas permissões.');
-      }
-    });
+    }
+
+    if (id) {
+      this.noticesService.updateNotice(id, payload).subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.closeCreateModal();
+          this.loadNotices();
+        },
+        error: (err: any) => {
+          this.isSubmitting.set(false);
+          console.error('Falha ao atualizar recado:', err);
+          alert("Erro ao atualizar recado. Verifique suas permissões.");
+        }
+      });
+    } else {
+      this.noticesService.createNotice(payload).subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.closeCreateModal();
+          this.loadNotices();
+        },
+        error: (err: any) => {
+          this.isSubmitting.set(false);
+          console.error('Erro ao cadastrar novo aviso:', err);
+          alert('Erro ao publicar aviso. Verifique suas permissões.');
+        }
+      });
+    }
   }
 
   deleteNotice(id: string, event?: Event): void {

@@ -72,7 +72,7 @@ export class NoticesController {
 
   //Português - Rota PATCH /notices/:id: Edição de aviso existente (Requer autenticação JWT).
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERVISOR)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizar informações de um recado' })

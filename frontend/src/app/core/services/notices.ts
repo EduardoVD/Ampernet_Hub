@@ -47,6 +47,13 @@ export class NoticesService {
     });
   }
 
+  updateNotice(id: string | number, dto: { title: string; content: string; category?: string}):
+    Observable<NoticeResponse> {
+      return this.http.patch<NoticeResponse>(`${this.apiUrl}/${id}`, dto, {
+        headers: this.getHeaders()
+      });
+    }
+
   deleteNotice(id: string | number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
       headers: this.getHeaders()

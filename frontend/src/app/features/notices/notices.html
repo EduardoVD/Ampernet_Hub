@@ -42,6 +42,17 @@
 
             <button
               *ngIf="canManageNotices()"
+              class="btn-edit-notice"
+              (click)="openEditModal(notice, $event)"
+              title="Editar Comunicado"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                <path d="m15 5 4 4"/>
+              </svg>
+            </button>
+            <button
+              *ngIf="canManageNotices()"
               class="btn-delete-notice"
               (click)="deleteNotice(notice.id, $event)"
               title="Excluir aviso do mural"
@@ -104,7 +115,7 @@
   <div *ngIf="isCreateModalOpen()" class="modal-backdrop" (click)="closeCreateModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
-        <h3>Publicar Novo Comunicado</h3>
+        <h3>{{ editingNoticeId() ? 'Editar Comunicado' : 'Publicar Movo Comunicado' }}</h3>
         <button class="modal-close-btn" (click)="closeCreateModal()">✕</button>
       </header>
 
@@ -154,7 +165,7 @@
         <footer class="modal-footer">
           <button type="button" class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
           <button type="submit" class="btn-submit" [disabled]="isSubmitting()">
-            {{ isSubmitting() ? 'Publicando...' : 'Publicar Aviso' }}
+            {{ isSubmitting() ? 'Salvando...' : (editingNoticeId() ? 'Salvar Alterações' : 'Publicar Aviso') }}
           </button>
         </footer>
       </form>
