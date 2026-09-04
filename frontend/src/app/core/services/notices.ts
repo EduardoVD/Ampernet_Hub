@@ -65,8 +65,7 @@ export class NoticesService {
     });
   }
 
-  updateNotice(id: string | number, dto: { title: string; content: string; category?: string}):
-    Observable<NoticeResponse> {
+  updateNotice(id: string | number, dto: { title: string; content: string; category?: string}): Observable<NoticeResponse> {
       return this.http.patch<NoticeResponse>(`${this.apiUrl}/${id}`, dto, {
         headers: this.getHeaders()
       });

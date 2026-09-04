@@ -128,7 +128,7 @@
   <div *ngIf="isCreateModalOpen()" class="modal-backdrop" (click)="closeCreateModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
-        <h3>{{ editingNoticeId() ? 'Editar Comunicado' : 'Publicar Movo Comunicado' }}</h3>
+        <h3>{{ editingNoticeId() ? 'Editar Comunicado' : 'Publicar Novo Comunicado' }}</h3>
         <button class="modal-close-btn" (click)="closeCreateModal()">✕</button>
       </header>
 

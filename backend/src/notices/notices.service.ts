@@ -94,13 +94,12 @@ export class NoticesService {
 
     const activeUsers = await this.userRepository.find({
       where: { isActive: true },
-      select: { id: true, name: true, email: true },
       order: { name: 'ASC' },
     });
 
     const reads = await this.noticeReadRepository.find({
       where: { notice: { id: notice.id } },
-      relations: { user:true },
+      relations: { user: true },
       order: { readAt: 'DESC' },
     });
 
@@ -132,7 +131,7 @@ export class NoticesService {
     }
 
     const totalUsers = activeUsers.length;
-    const readCount = readers. length;
+    const readCount = readers.length;
     const pendingCount = pending.length;
     const percentage = totalUsers > 0 ? Math.round(readCount / totalUsers * 100) : 0;
 

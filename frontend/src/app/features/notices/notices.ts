@@ -180,30 +180,30 @@ export class NoticesComponent implements OnInit {
   }
 
   openReadStatusModal(notice: NoticeDetail, event?: Event): void {
-  if (event) {
-    event.stopPropagation();
-  }
-  this.isStatusModalOpen.set(true);
-  this.isLoadingStatus.set(true);
-  this.statusModalData.set(null);
-  this.activeStatusTab.set('readers');
-
-  this.noticesService.getReadStatus(notice.id).subscribe({
-    next: (data) => {
-      this.statusModalData.set(data);
-      this.isLoadingStatus.set(false);
-    },
-    error: (err: any) => {
-      this.isLoadingStatus.set(false);
-      console.error('Erro ao carregar status de leitura:', err);
-      alert('Não foi possível carregar as informações de leitura.');
-      this.closeReadStatusModal();
+    if (event) {
+      event.stopPropagation();
     }
-  });
-}
+    this.isStatusModalOpen.set(true);
+    this.isLoadingStatus.set(true);
+    this.statusModalData.set(null);
+    this.activeStatusTab.set('readers');
 
-closeReadStatusModal(): void {
-  this.isStatusModalOpen.set(false);
-  this.statusModalData.set(null);
-}
+    this.noticesService.getReadStatus(notice.id).subscribe({
+      next: (data) => {
+        this.statusModalData.set(data);
+        this.isLoadingStatus.set(false);
+      },
+      error: (err: any) => {
+        this.isLoadingStatus.set(false);
+        console.error('Erro ao carregar status de leitura:', err);
+        alert('Não foi possível carregar as informações de leitura.');
+        this.closeReadStatusModal();
+      }
+    });
+  }
+
+  closeReadStatusModal(): void {
+    this.isStatusModalOpen.set(false);
+    this.statusModalData.set(null);
+  }
 }
