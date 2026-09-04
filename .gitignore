@@ -1,0 +1,24 @@
+#Português - Dependências.
+node_modules/
+*/node_modules/
+
+#Português - Builds e Saídas.
+dist/
+*/dist/
+
+#Português - Variáveis de Ambiente.
+.env
+.env.*
+!.env.example
+*.local
+
+#Português - Logs.
+*.log
+npm-debug.log*
+
+#Português - IDE's.
+.vscode/
+.idea/
+
+#Português - Execução.
+*.bat

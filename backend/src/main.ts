@@ -36,8 +36,9 @@ async function bootstrap() {
   //Português - Registra a rota '/api' para servir a interface visual do Swagger no navegador.
   SwaggerModule.setup('api', app, document);
 
-  //Português - Inicia o servidor HTTP escutando na porta 3000.
-  await app.listen(3000);
+  //Português - Inicia o servidor HTTP escutando na porta configurada no .env ou 3000.
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
 }
 
 //Português - Executa a função de inicialização da aplicação.

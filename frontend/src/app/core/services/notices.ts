@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface NoticeResponse {
   id: number;
@@ -36,7 +37,7 @@ export interface NoticeReadStatusResponse {
 })
 export class NoticesService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/notices';
+  private apiUrl = `${environment.apiUrl}/notices`;
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
