@@ -184,7 +184,6 @@
       </form>
     </div>
   </div>
-  <!-- Modal de Status de Leitura -->
 <div *ngIf="isStatusModalOpen()" class="modal-backdrop" (click)="closeReadStatusModal()">
   <div class="modal-card status-modal-card" (click)="$event.stopPropagation()">
     <header class="modal-header">
@@ -195,14 +194,11 @@
       <button class="modal-close-btn" (click)="closeReadStatusModal()">✕</button>
     </header>
 
-    <!-- Indicador de carregamento -->
     <div *ngIf="isLoadingStatus()" class="status-loading">
       <p>Carregando colaboradores...</p>
     </div>
 
-    <!-- Dados carregados -->
     <div *ngIf="!isLoadingStatus() && statusModalData()" class="status-modal-body">
-      <!-- Barra de Progresso Geral -->
       <div class="progress-box">
         <div class="progress-labels">
           <span><strong>{{ statusModalData()?.readCount }}</strong> de <strong>{{ statusModalData()?.totalUsers }}</strong> colaboradores confirmaram</span>
@@ -213,7 +209,6 @@
         </div>
       </div>
 
-      <!-- Abas para alternar entre quem leu e quem falta ler -->
       <div class="status-tabs">
         <button
           type="button"
@@ -233,7 +228,6 @@
         </button>
       </div>
 
-      <!-- Lista 1: Quem já confirmou leitura -->
       <div *ngIf="activeStatusTab() === 'readers'" class="users-list-container">
         <div *ngIf="statusModalData()?.readers?.length === 0" class="empty-status-state">
           <p>Nenhum colaborador confirmou a leitura até o momento.</p>
