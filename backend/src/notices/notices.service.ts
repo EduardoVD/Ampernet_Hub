@@ -14,6 +14,8 @@ export class NoticesService {
     private readonly noticeRepository: Repository<Notice>,
     @InjectRepository(NoticeRead)
     private readonly noticeReadRepository: Repository<NoticeRead>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(createNoticeDto: CreateNoticeDto, author: User): Promise<Notice> {
@@ -85,5 +87,64 @@ export class NoticesService {
     const notice = await this.findOne(id);
     await this.noticeRepository.remove(notice);
     return { message: `Recado ${id} removido com sucesso.` };
+  }
+
+  async getReadStatus(noticeId: number) {
+    const notice = await this.findOne(noticeId);
+
+    const activeUsers = await this.userRepository.find({
+      where: { isActive: true },
+      select: { id: true, name: true, email: true },
+      order: { name: 'ASC' },
+    });
+
+    const reads = await this.noticeReadRepository.find({
+      where: { notice: { id: notice.id } },
+      relations: { user:true },
+      order: { readAt: 'DESC' },
+    });
+
+    const readMap = new Map<number, Date>();
+    for (const r of reads) {
+      if (r.user) {
+        readMap.set(r.user.id, r.readAt);
+      }
+    }
+
+    const readers: Array<{ id: number; name: string; email: string; readAt: Date }> = [];
+    const pending: Array<{ id: number; name: string; email: string}> = [];
+
+    for (const user of activeUsers) {
+      if (readMap.has(user.id)) {
+        readers.push({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          readAt: readMap.get(user.id)!,
+        });
+      } else {
+        pending.push({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        });
+      }
+    }
+
+    const totalUsers = activeUsers.length;
+    const readCount = readers. length;
+    const pendingCount = pending.length;
+    const percentage = totalUsers > 0 ? Math.round(readCount / totalUsers * 100) : 0;
+
+    return {
+      noticeId: notice.id,
+      noticeTitle: notice.title,
+      totalUsers,
+      readCount,
+      pendingCount,
+      percentage,
+      readers,
+      pending,
+    };
   }
 }

@@ -188,6 +188,26 @@ $font-body: 'Cambria', 'Georgia', serif;
               font-weight: 600;
             }
             
+            .btn-status-notice {
+              background: rgba(16, 185, 129, 0.12);
+              border: 1px solid rgba(16, 185, 129, 0.25);
+              color: #10b981;
+              padding: 0.4rem;
+              border-radius: 8px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.2s ease;
+
+              &:hover {
+                background: #10b981;
+                color: #ffffff;
+                border-color: #10b981;
+                transform: scale(1.05);
+              }
+            }
+
             .btn-edit-notice {
               background: rgba(59, 130, 246, 0.12);
               border: 1px solid rgba(59, 130, 246, 0.25);
@@ -461,6 +481,175 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
   }
 
+  .status-modal-card {
+  max-width: 580px !important;
+
+  .status-subtitle {
+    font-family: $font-body;
+    font-size: 0.88rem;
+    color: $text-muted;
+    margin-top: 0.25rem;
+  }
+
+  .status-loading {
+    padding: 2.5rem;
+    text-align: center;
+    color: $text-muted;
+  }
+
+  .status-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    .progress-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 1rem;
+      border-radius: 10px;
+
+      .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.6rem;
+        font-size: 0.9rem;
+
+        .percentage-badge {
+          font-weight: 700;
+          color: $purple-light;
+          font-family: $font-title;
+        }
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #10b981, $purple-light);
+          border-radius: 4px;
+          transition: width 0.4s ease;
+        }
+      }
+    }
+
+    .status-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.5rem;
+
+      .tab-btn {
+        background: none;
+        border: none;
+        color: $text-muted;
+        padding: 0.5rem 1rem;
+        font-family: $font-title;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          color: $text-light;
+        }
+
+        &.active {
+          background: rgba($purple-light, 0.2);
+          color: #a78bfa;
+        }
+      }
+    }
+
+    .users-list-container {
+      max-height: 280px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+
+      .empty-status-state {
+        padding: 2rem;
+        text-align: center;
+        color: $text-muted;
+
+        &.success {
+          color: #34d399;
+        }
+      }
+
+      .user-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.65rem 0.85rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 8px;
+
+        .user-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.85rem;
+          margin-right: 0.75rem;
+
+          &.read {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+          }
+
+          &.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+          }
+        }
+
+        .user-info {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+
+          .name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: $text-light;
+          }
+
+          .email {
+            font-size: 0.78rem;
+            color: $text-muted;
+          }
+        }
+
+        .read-date {
+          font-size: 0.75rem;
+          color: #10b981;
+          font-family: $font-body;
+        }
+
+        .pending-tag {
+          font-size: 0.75rem;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          background: rgba(245, 158, 11, 0.15);
+          color: #f59e0b;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
 
 @keyframes fadeIn {
   from {

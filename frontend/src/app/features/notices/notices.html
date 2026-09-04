@@ -65,6 +65,19 @@
                 <line x1="14" y1="11" x2="14" y2="17"/>
               </svg>
             </button>
+            <button
+              *ngIf="canManageNotices()"
+              class="btn-status-notice"
+              (click)="openReadStatusModal(notice, $event)"
+              title="Ver confirmações de leitura"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </button>
           </div>
         </header>
 
@@ -171,4 +184,85 @@
       </form>
     </div>
   </div>
+  <!-- Modal de Status de Leitura -->
+<div *ngIf="isStatusModalOpen()" class="modal-backdrop" (click)="closeReadStatusModal()">
+  <div class="modal-card status-modal-card" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <h3>Confirmações de Leitura</h3>
+        <p class="status-subtitle">{{ statusModalData()?.noticeTitle }}</p>
+      </div>
+      <button class="modal-close-btn" (click)="closeReadStatusModal()">✕</button>
+    </header>
+
+    <!-- Indicador de carregamento -->
+    <div *ngIf="isLoadingStatus()" class="status-loading">
+      <p>Carregando colaboradores...</p>
+    </div>
+
+    <!-- Dados carregados -->
+    <div *ngIf="!isLoadingStatus() && statusModalData()" class="status-modal-body">
+      <!-- Barra de Progresso Geral -->
+      <div class="progress-box">
+        <div class="progress-labels">
+          <span><strong>{{ statusModalData()?.readCount }}</strong> de <strong>{{ statusModalData()?.totalUsers }}</strong> colaboradores confirmaram</span>
+          <span class="percentage-badge">{{ statusModalData()?.percentage }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="statusModalData()?.percentage"></div>
+        </div>
+      </div>
+
+      <!-- Abas para alternar entre quem leu e quem falta ler -->
+      <div class="status-tabs">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeStatusTab() === 'readers'"
+          (click)="activeStatusTab.set('readers')"
+        >
+          ✓ Confirmaram ({{ statusModalData()?.readCount }})
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeStatusTab() === 'pending'"
+          (click)="activeStatusTab.set('pending')"
+        >
+          ⏳ Pendentes ({{ statusModalData()?.pendingCount }})
+        </button>
+      </div>
+
+      <!-- Lista 1: Quem já confirmou leitura -->
+      <div *ngIf="activeStatusTab() === 'readers'" class="users-list-container">
+        <div *ngIf="statusModalData()?.readers?.length === 0" class="empty-status-state">
+          <p>Nenhum colaborador confirmou a leitura até o momento.</p>
+        </div>
+        <div *ngFor="let reader of statusModalData()?.readers" class="user-item-row">
+          <div class="user-avatar read">{{ reader.name.charAt(0).toUpperCase() }}</div>
+          <div class="user-info">
+            <span class="name">{{ reader.name }}</span>
+            <span class="email">{{ reader.email }}</span>
+          </div>
+          <span class="read-date" *ngIf="reader.readAt">
+            {{ reader.readAt | date:'dd/MM/yyyy · HH:mm' }}
+          </span>
+        </div>
+      </div>
+      <div *ngIf="activeStatusTab() === 'pending'" class="users-list-container">
+        <div *ngIf="statusModalData()?.pending?.length === 0" class="empty-status-state success">
+          <p>Todos os colaboradores já confirmaram este comunicado.</p>
+        </div>
+        <div *ngFor="let pendingUser of statusModalData()?.pending" class="user-item-row">
+          <div class="user-avatar pending">{{ pendingUser.name.charAt(0).toUpperCase() }}</div>
+          <div class="user-info">
+            <span class="name">{{ pendingUser.name }}</span>
+            <span class="email">{{ pendingUser.email }}</span>
+          </div>
+          <span class="pending-tag">Pendente</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </div>

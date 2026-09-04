@@ -13,6 +13,24 @@ export interface NoticeResponse {
   isRead: boolean;
 }
 
+export interface NoticeReader {
+  id: number;
+  name: string;
+  email: string;
+  readAt?: string;
+}
+
+export interface NoticeReadStatusResponse {
+  noticeId: number;
+  noticeTitle: string;
+  totalUsers: number;
+  readCount: number;
+  pendingCount: number;
+  percentage: number;
+  readers: NoticeReader[];
+  pending: NoticeReader[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -56,6 +74,12 @@ export class NoticesService {
 
   deleteNotice(id: string | number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getReadStatus(noticeId: string | number): Observable<NoticeReadStatusResponse> {
+    return this.http.get<NoticeReadStatusResponse>(`${this.apiUrl}/${noticeId}/read-status`, {
       headers: this.getHeaders()
     });
   }

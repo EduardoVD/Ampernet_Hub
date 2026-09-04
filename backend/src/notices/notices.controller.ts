@@ -62,12 +62,23 @@ export class NoticesController {
     return this.noticesService.findOne(id);
   }
 
+  //Português - Rota PATCH /notices/:id/read: Marcar aviso ou recado como lido.
   @Patch(':id/read')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Marcar aviso como lido pelo usuário atual' })
   markAsRead(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
     return this.noticesService.markAsRead(id, req.user);
+  }
+
+  //Português - Rota GET /notices/:id/read-status: Relatório de leitura (Admin e Supervisor).
+  @Get(':id/read-status')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERVISOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obter status de confirmação de leitura do aviso' })
+  getReadStatus(@Param('id', ParseIntPipe) id: number) {
+    return this.noticesService.getReadStatus(id);
   }
 
   //Português - Rota PATCH /notices/:id: Edição de aviso existente (Requer autenticação JWT).
