@@ -5,12 +5,14 @@ import { DashboardComponent } from './features/dashboard/dashboard';
 import { NoticesComponent } from './features/notices/notices';
 import { Issues } from './features/issues/issues';
 import { Matrix } from './features/matrix/matrix';
+import { authGuard, publicGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [publicGuard] },
   {
     path: '',
-    component: MainLayoutComponent,
+    component: MainLayoutComponent, 
+    canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'recados', component: NoticesComponent },
