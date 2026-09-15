@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { NoticesModule } from './notices/notices.module';
+import { IssuesModule } from './issues/issues.module';
 
 @Module({
   //Português - Seção de importações de módulos externos ou submódulos da aplicação.
@@ -29,6 +30,7 @@ import { NoticesModule } from './notices/notices.module';
     UsersModule,
     AuthModule,
     NoticesModule,
+    IssuesModule,
   ],
 })
 //Português - Exporta a classe do módulo raiz para ser instanciada no main.ts.

@@ -1,1 +1,221 @@
-<p style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; "><em>Não foi desenvolvido ainda! Porém já está criado a tela para o futuro desenvolvimento...</em></p>
+﻿<div class="issues-page">
+  <section class="page-title-bar">
+    <div class="title-left">
+      <h2>Registro de Problemas Gerais</h2>
+      <p>Histórico detalhado de ocorrências e manutenções</p>
+    </div>
+
+    <div class="title-right">
+      <div class="filter-pills">
+        <button
+          type="button"
+          class="filter-pill"
+          [class.active]="activeFilter() === 'all'"
+          (click)="setFilter('all')"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="filter-pill"
+          [class.active]="activeFilter() === 'ongoing'"
+          (click)="setFilter('ongoing')"
+        >
+          Ocorrendo
+        </button>
+        <button
+          type="button"
+          class="filter-pill"
+          [class.active]="activeFilter() === 'resolved'"
+          (click)="setFilter('resolved')"
+        >
+          Resolvidos
+        </button>
+      </div>
+      <button *ngIf="canManage()" class="btn-new-issue" (click)="openCreateModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Novo Registro</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="issues-list">
+    <div *ngIf="filteredIssues().length === 0" class="empty-state">
+      <p>Nenhuma ocorrência encontrada para o filtro selecionado.</p>
+    </div>
+
+    <article
+      *ngFor="let issue of filteredIssues()"
+      class="issue-card"
+      [ngClass]="issue.status"
+    >
+      <header class="card-header">
+        <div class="header-left">
+          <span class="badge" [ngClass]="issue.status">
+            {{ issue.status === 'ongoing' ? 'Problema Ocorrendo' : 'Problema Resolvido' }}
+          </span>
+          <h3 class="issue-title">· {{ issue.title }}</h3>
+        </div>
+
+        <div class="header-actions" *ngIf="canManage()">
+          <button
+            *ngIf="issue.status === 'ongoing'"
+            class="btn-action resolve"
+            (click)="resolveIssue(issue, $event)"
+            title="Marcar como resolvido agora"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+
+          <button
+            class="btn-action edit"
+            (click)="openEditModal(issue, $event)"
+            title="Editar ocorrência"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+              <path d="m15 5 4 4"/>
+            </svg>
+          </button>
+
+          <button
+            class="btn-action delete"
+            (click)="deleteIssue(issue, $event)"
+            title="Excluir ocorrência"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <p class="issue-description">{{ issue.description }}</p>
+
+      <footer class="card-footer">
+        <div class="meta-block">
+          <div class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div class="meta-info">
+            <span class="label">INÍCIO</span>
+            <span class="value">{{ issue.formattedStarted }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="issue.status === 'resolved' && issue.formattedResolved" class="meta-block">
+          <div class="icon resolved-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div class="meta-info">
+            <span class="label">TÉRMINO</span>
+            <span class="value">{{ issue.formattedResolved }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="issue.status === 'resolved' && issue.durationText" class="meta-block">
+          <div class="icon duration-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="meta-info">
+            <span class="label">DURAÇÃO</span>
+            <span class="value duration-val">{{ issue.durationText }}</span>
+          </div>
+        </div>
+      </footer>
+    </article>
+  </section>
+
+  <div *ngIf="isModalOpen()" class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <h3>{{ editingIssueId() ? 'Editar Ocorrência' : 'Novo Registro de Problema' }}</h3>
+        <button class="modal-close-btn" (click)="closeModal()">✕</button>
+      </header>
+
+      <form (ngSubmit)="submitIssue()" class="modal-form">
+        <div class="form-group">
+          <label for="issue-title">Título da Ocorrência *</label>
+          <input
+            id="issue-title"
+            type="text"
+            [ngModel]="issueTitle()"
+            (ngModelChange)="issueTitle.set($event)"
+            name="title"
+            placeholder="Ex: PGO - OLT DANTAS OFFLINE"
+            required
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="issue-status">Status *</label>
+            <select
+              id="issue-status"
+              [ngModel]="issueStatus()"
+              (ngModelChange)="issueStatus.set($event)"
+              name="status"
+            >
+              <option value="ongoing">Problema Ocorrendo</option>
+              <option value="resolved">Problema Resolvido</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="issue-start">Data e Hora de Início *</label>
+            <input
+              id="issue-start"
+              type="datetime-local"
+              [ngModel]="issueStartedAt()"
+              (ngModelChange)="issueStartedAt.set($event)"
+              name="startedAt"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="issue-desc">Descrição Detalhada *</label>
+          <textarea
+            id="issue-desc"
+            [ngModel]="issueDescription()"
+            (ngModelChange)="issueDescription.set($event)"
+            name="description"
+            rows="5"
+            placeholder="Descreva a ocorrência, região afetada, procedimentos adotados e equipe envolvida..."
+            required
+          ></textarea>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-submit" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Salvando...' : (editingIssueId() ? 'Salvar Alterações' : 'Registrar Problema') }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+</div>

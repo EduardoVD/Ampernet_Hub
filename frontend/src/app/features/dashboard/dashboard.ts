@@ -3,13 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth';
 import { NoticesService } from '../../core/services/notices';
-
-export interface IssueItem {
-  id: string;
-  title: string;
-  description: string;
-  status: 'ongoing' | 'resolved';
-}
+import { IssuesService, IssueItem } from '../../core/services/issues';
 
 export interface NoticeItem {
   id: string;
@@ -43,6 +37,7 @@ export interface ModalDetail {
 export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private noticesService = inject(NoticesService);
+  private issuesService = inject(IssuesService);
 
   currentUser = this.authService.currentUser;
 
@@ -73,6 +68,16 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBackendNotices();
+    this.loadBackendIssues();
+  }
+
+  loadBackendIssues(): void {
+    this.issuesService.getIssues().subscribe({
+      next: (data) => {
+        this.issues.set(data);
+      },
+      error: (err: any) => console.error('Erro ao carregar ocorrências:', err)
+    });
   }
 
   loadBackendNotices(): void {
