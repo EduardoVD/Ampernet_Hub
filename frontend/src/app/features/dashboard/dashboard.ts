@@ -4,18 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth';
 import { NoticesService } from '../../core/services/notices';
 import { IssuesService, IssueItem } from '../../core/services/issues';
+import { ResponsibilitiesService, ResponsibilityItem } from '../../core/services/responsibilities';
 
 export interface NoticeItem {
   id: string;
   title: string;
   description: string;
   read: boolean;
-}
-
-export interface ResponsibilityItem {
-  sector: string;
-  city: string;
-  responsible: string;
 }
 
 export interface ModalDetail {
@@ -38,6 +33,7 @@ export class DashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private noticesService = inject(NoticesService);
   private issuesService = inject(IssuesService);
+  private responsibilitiesService = inject(ResponsibilitiesService);
 
   currentUser = this.authService.currentUser;
 
@@ -46,29 +42,24 @@ export class DashboardComponent implements OnInit {
 
   issues = signal<IssueItem[]>([]);
   notices = signal<NoticeItem[]>([]);
-
-  responsibilities = signal<ResponsibilityItem[]>([
-    { sector: 'NOC', city: 'Fortaleza', responsible: 'Carlos Lima' },
-    { sector: 'Suporte', city: 'Caucaia', responsible: 'Ana Souza' },
-    { sector: 'Comercial', city: 'Maracanaú', responsible: 'João Ferreira' },
-    { sector: 'Técnico', city: 'Sobral', responsible: 'Maria Oliveira' }
-  ]);
+  responsibilities = signal<ResponsibilityItem[]>([]);
 
   activeModal = signal<ModalDetail | null>(null);
 
   filteredResponsibilities = computed(() => {
-    const city = this.cityFilter().toLowerCase();
-    const sector = this.sectorFilter().toLowerCase();
+    const city = this.cityFilter().trim().toLowerCase();
+    const sector = this.sectorFilter().trim().toLowerCase();
 
     return this.responsibilities().filter(item =>
-      item.city.toLowerCase().includes(city) &&
-      item.sector.toLowerCase().includes(sector)
+      (!city || item.city.toLowerCase().includes(city)) &&
+      (!sector || item.sector.toLowerCase().includes(sector))
     );
   });
 
   ngOnInit(): void {
     this.loadBackendNotices();
     this.loadBackendIssues();
+    this.loadBackendResponsibilities();
   }
 
   loadBackendIssues(): void {
@@ -92,6 +83,13 @@ export class DashboardComponent implements OnInit {
         this.notices.set(formatted);
       },
       error: (err: any) => console.error('Erro ao carregar recados:', err)
+    });
+  }
+
+  loadBackendResponsibilities(): void {
+    this.responsibilitiesService.getResponsibilities().subscribe({
+      next: (data) => this.responsibilities.set(data),
+      error: (err: any) => console.error('Erro ao carregar matriz de responsabilidades:', err)
     });
   }
 

@@ -80,16 +80,23 @@
                   <th>SETOR</th>
                   <th>CIDADE</th>
                   <th>RESPONSÁVEL</th>
+                  <th>RAMAL</th>
+                  <th>E-MAIL</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let row of filteredResponsibilities()">
-                  <td>{{ row.sector }}</td>
+                  <td><span class="sector-tag">{{ row.sector }}</span></td>
                   <td>{{ row.city }}</td>
                   <td>{{ row.responsible }}</td>
+                  <td>{{ row.ramal || '—' }}</td>
+                  <td>
+                    <a *ngIf="row.email" [href]="'mailto:' + row.email" class="email-link">{{ row.email }}</a>
+                    <span *ngIf="!row.email">—</span>
+                  </td>
                 </tr>
                 <tr *ngIf="filteredResponsibilities().length === 0">
-                  <td colspan="3" class="table-empty">Nenhum registro encontrado para os filtros informados.</td>
+                  <td colspan="5" class="table-empty">Nenhum registro encontrado para os filtros informados.</td>
                 </tr>
               </tbody>
             </table>

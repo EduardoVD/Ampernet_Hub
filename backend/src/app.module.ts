@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { NoticesModule } from './notices/notices.module';
 import { IssuesModule } from './issues/issues.module';
+import { ResponsibilitiesModule } from './responsibilities/responsibilities.module';
 
 @Module({
   //Português - Seção de importações de módulos externos ou submódulos da aplicação.
@@ -31,6 +32,7 @@ import { IssuesModule } from './issues/issues.module';
     AuthModule,
     NoticesModule,
     IssuesModule,
+    ResponsibilitiesModule,
   ],
 })
 //Português - Exporta a classe do módulo raiz para ser instanciada no main.ts.

@@ -1,1 +1,222 @@
-<p style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; "><em>Não foi desenvolvido ainda! Porém já está criado a tela para o futuro desenvolvimento...</em></p>
+﻿<div class="matrix-page">
+  <!-- Barra de Título Superior -->
+  <section class="page-title-bar">
+    <div class="title-left">
+      <h2>Matriz Dinâmica de Responsabilidades</h2>
+      <p>Mapeamento de equipes técnicas, cidades e contatos por setor</p>
+    </div>
+
+    <button *ngIf="canManage()" class="btn-new-resp" (click)="openCreateModal()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Novo Responsável</span>
+    </button>
+  </section>
+
+  <!-- Filtros de Busca -->
+  <section class="filters-card">
+    <div class="filter-group">
+      <label for="filter-city">Filtrar por Cidade:</label>
+      <input
+        id="filter-city"
+        type="text"
+        [ngModel]="cityFilter()"
+        (ngModelChange)="cityFilter.set($event)"
+        placeholder="Ex: Fortaleza, Caucaia..."
+      />
+    </div>
+
+    <div class="filter-group">
+      <label for="filter-sector">Filtrar por Setor:</label>
+      <input
+        id="filter-sector"
+        type="text"
+        [ngModel]="sectorFilter()"
+        (ngModelChange)="sectorFilter.set($event)"
+        placeholder="Ex: NOC, Suporte..."
+      />
+    </div>
+
+    <div class="filter-group flex-grow">
+      <label for="filter-search">Buscar por Nome, Ramal ou E-mail:</label>
+      <input
+        id="filter-search"
+        type="text"
+        [ngModel]="searchFilter()"
+        (ngModelChange)="searchFilter.set($event)"
+        placeholder="Digite o nome, ramal ou e-mail..."
+      />
+    </div>
+  </section>
+
+  <!-- Tabela de Responsabilidades -->
+  <section class="table-container">
+    <div class="table-scroll">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>SETOR</th>
+            <th>CIDADE</th>
+            <th>RESPONSÁVEL</th>
+            <th>RAMAL</th>
+            <th>E-MAIL</th>
+            <th *ngIf="canManage()" class="th-actions">AÇÕES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredResponsibilities()">
+            <td>
+              <span class="sector-badge">{{ item.sector }}</span>
+            </td>
+            <td class="city-col">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pin-icon">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>{{ item.city }}</span>
+            </td>
+            <td class="resp-col">
+              <div class="avatar">{{ (item.responsible || 'R').charAt(0).toUpperCase() }}</div>
+              <span class="resp-name">{{ item.responsible }}</span>
+            </td>
+            <td>
+              <span *ngIf="item.ramal" class="ramal-tag">
+                📞 {{ item.ramal }}
+              </span>
+              <span *ngIf="!item.ramal" class="empty-text">—</span>
+            </td>
+            <td>
+              <a *ngIf="item.email" [href]="'mailto:' + item.email" class="email-link">
+                ✉️ {{ item.email }}
+              </a>
+              <span *ngIf="!item.email" class="empty-text">—</span>
+            </td>
+            <td *ngIf="canManage()" class="td-actions">
+              <button
+                class="btn-action edit"
+                (click)="openEditModal(item, $event)"
+                title="Editar dados"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                  <path d="m15 5 4 4"/>
+                </svg>
+              </button>
+              <button
+                class="btn-action delete"
+                (click)="deleteItem(item, $event)"
+                title="Remover responsável"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredResponsibilities().length === 0">
+            <td [attr.colspan]="canManage() ? 6 : 5" class="empty-table-state">
+              Nenhum responsável encontrado para os filtros selecionados.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Modal de Criação / Edição -->
+  <div *ngIf="isModalOpen()" class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <h3>{{ editingId() ? 'Editar Responsável' : 'Novo Responsável na Matriz' }}</h3>
+        <button class="modal-close-btn" (click)="closeModal()">✕</button>
+      </header>
+
+      <form (ngSubmit)="submitForm()" class="modal-form">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="form-city">Cidade *</label>
+            <input
+              id="form-city"
+              type="text"
+              [ngModel]="formCity()"
+              (ngModelChange)="formCity.set($event)"
+              name="city"
+              placeholder="Ex: Fortaleza"
+              required
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="form-sector">Setor *</label>
+            <select
+              id="form-sector"
+              [ngModel]="formSector()"
+              (ngModelChange)="formSector.set($event)"
+              name="sector"
+            >
+              <option value="NOC">NOC</option>
+              <option value="Suporte">Suporte</option>
+              <option value="Comercial">Comercial</option>
+              <option value="Técnico">Técnico</option>
+              <option value="Infraestrutura">Infraestrutura</option>
+              <option value="Financeiro">Financeiro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="form-resp">Nome do Responsável *</label>
+          <input
+            id="form-resp"
+            type="text"
+            [ngModel]="formResponsible()"
+            (ngModelChange)="formResponsible.set($event)"
+            name="responsible"
+            placeholder="Ex: Carlos Lima"
+            required
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="form-ramal">Ramal (Opcional)</label>
+            <input
+              id="form-ramal"
+              type="text"
+              [ngModel]="formRamal()"
+              (ngModelChange)="formRamal.set($event)"
+              name="ramal"
+              placeholder="Ex: 4002"
+            />
+          </div>
+
+          <div class="form-group flex-2">
+            <label for="form-email">E-mail para Contato (Opcional)</label>
+            <input
+              id="form-email"
+              type="email"
+              [ngModel]="formEmail()"
+              (ngModelChange)="formEmail.set($event)"
+              name="email"
+              placeholder="Ex: carlos.lima@ampernet.com.br"
+            />
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-submit" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Salvando...' : (editingId() ? 'Salvar Alterações' : 'Cadastrar Responsável') }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+</div>
