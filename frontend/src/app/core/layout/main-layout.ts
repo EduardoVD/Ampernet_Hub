@@ -21,6 +21,8 @@ export class MainLayoutComponent {
     return name ? name.charAt(0).toUpperCase() : 'U';
   });
 
+  isAdmin = computed(() => this.currentUser()?.role === 'admin');
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

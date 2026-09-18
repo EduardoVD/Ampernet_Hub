@@ -5,7 +5,8 @@ import { DashboardComponent } from './features/dashboard/dashboard';
 import { NoticesComponent } from './features/notices/notices';
 import { Issues } from './features/issues/issues';
 import { Matrix } from './features/matrix/matrix';
-import { authGuard, publicGuard } from './core/guards/auth.guard';
+import { UsersComponent } from './features/users/users';
+import { authGuard, publicGuard, roleGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [publicGuard] },
@@ -18,6 +19,7 @@ export const routes: Routes = [
       { path: 'recados', component: NoticesComponent },
       { path: 'problemas', component: Issues },
       { path: 'matriz', component: Matrix },
+      { path: 'usuarios', component: UsersComponent, canActivate: [roleGuard(['admin'])] },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

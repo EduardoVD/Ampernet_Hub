@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { UserRole } from '../enums/user-role.enum';
 
 export class CreateUserDto {
@@ -42,4 +42,15 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(UserRole, { message: 'Papel de usuário inválido' })
   role?: UserRole;
+
+  //Português - Status de ativação da conta.
+  @ApiProperty({
+    description: 'Status de ativação da conta',
+    example: true,
+    required: false,
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'O status da conta deve ser verdadeiro ou falso' })
+  isActive?: boolean;
 }
