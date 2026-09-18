@@ -55,6 +55,8 @@ export class NoticesController {
 
   //Português - Rota GET /notices/:id: Consulta de um recado por ID.
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Buscar detalhes de um recado específico pelo ID' })
   @ApiResponse({ status: 200, description: 'Recado encontrado.' })
   @ApiResponse({ status: 404, description: 'Recado não encontrado.' })

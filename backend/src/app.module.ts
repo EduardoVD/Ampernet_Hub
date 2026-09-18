@@ -25,7 +25,7 @@ import { ResponsibilitiesModule } from './responsibilities/responsibilities.modu
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE', 'amper_hub_db'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: configService.get<string>('DB_SYNCHRONIZE', 'true') === 'true',
       }),
     }),
     UsersModule,

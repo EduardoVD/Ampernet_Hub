@@ -1,18 +1,86 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  OnModuleInit,
+  Logger,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserRole } from './enums/user-role.enum';
 
 @Injectable()
-export class UsersService {
-  //Português - Injeta o repositório TypeORM da entidade User no construtor da classe.
+export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+
+  //Português - Injeta o repositório TypeORM da entidade User e o ConfigService.
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.seedInitialAdmin();
+  }
+
+  //Português - Garante a existência de ao menos um administrador padrão no sistema.
+  private async seedInitialAdmin(): Promise<void> {
+    try {
+      const adminCount = await this.userRepository.count({
+        where: { role: UserRole.ADMIN },
+      });
+
+      if (adminCount === 0) {
+        const email = this.configService.get<string>(
+          'DEFAULT_ADMIN_EMAIL',
+          'admin@ampernet.com.br',
+        );
+        const password = this.configService.get<string>(
+          'DEFAULT_ADMIN_PASSWORD',
+          'admin123',
+        );
+        const name = this.configService.get<string>(
+          'DEFAULT_ADMIN_NAME',
+          'Administrador Ampernet',
+        );
+
+        const existingByEmail = await this.userRepository.findOne({
+          where: { email },
+        });
+
+        if (!existingByEmail) {
+          const hashedPassword = await bcrypt.hash(password, 10);
+          const adminUser = this.userRepository.create({
+            name,
+            email,
+            password: hashedPassword,
+            role: UserRole.ADMIN,
+            isActive: true,
+          });
+          await this.userRepository.save(adminUser);
+          this.logger.log(
+            `[SEED] Usuário administrador inicial criado com sucesso: ${email}`,
+          );
+        } else {
+          existingByEmail.role = UserRole.ADMIN;
+          await this.userRepository.save(existingByEmail);
+          this.logger.log(
+            `[SEED] Usuário existente (${email}) promovido para o perfil ADMIN.`,
+          );
+        }
+      } else {
+        this.logger.log('[SEED] Administrador já existente no banco de dados.');
+      }
+    } catch (error) {
+      this.logger.error('[SEED] Erro ao verificar/criar administrador inicial:', error);
+    }
+  }
 
   //Português - Método assíncrono para criar um novo usuário no sistema.
   async create(createUserDto: CreateUserDto): Promise<User> {

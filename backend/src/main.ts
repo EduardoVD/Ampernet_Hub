@@ -7,7 +7,14 @@ async function bootstrap() {
   //Português - Cria a instância principal da aplicação HTTP baseada no AppModule.
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  //Português - Configura o CORS com as origens permitidas da aplicação e métodos aceitos.
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+  app.enableCors({
+    origin: [frontendUrl, 'http://localhost:4200', 'http://127.0.0.1:4200'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   //Português - Ativa a validação global de DTOs descartando propriedades não declaradas (whitelist).
   app.useGlobalPipes(
