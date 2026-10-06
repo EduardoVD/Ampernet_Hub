@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
+import { ToastService } from '../../core/services/toast';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ import { AuthService } from '../../core/services/auth';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
 
   showPassword = false;
@@ -32,11 +34,12 @@ export class LoginComponent {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
+        this.toastService.success('Seja bem-vindo ao Ampernet Hub!', 'Login efetuado');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error('Falha na autenticação:', err);
-        alert('Credenciais inválidas ou servidor fora do ar.');
+        this.toastService.error('Credenciais inválidas ou servidor indisponível.', 'Falha no Acesso');
       }
     });
   }

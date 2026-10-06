@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ToastService } from './toast';
 
 export interface UserPayload {
   id: number | string;
@@ -22,6 +23,7 @@ export interface LoginResponse {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private toastService = inject(ToastService);
   private apiUrl = `${environment.apiUrl}/auth/login`;
 
   private expirationTimer: any = null;
@@ -105,7 +107,7 @@ export class AuthService {
         }
 
         this.expirationTimer = setTimeout(() => {
-          alert('Sua sessão expirou. Por favor, faça Login novamente.');
+          this.toastService.warning('Sua sessão expirou. Por favor, faça login novamente.', 'Sessão Expirada');
           this.logout();
         }, timeLeft);
       }

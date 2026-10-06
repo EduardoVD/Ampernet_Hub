@@ -1,4 +1,4 @@
-﻿$purple-primary: #5c1bc4;
+$purple-primary: #5c1bc4;
 $purple-light: #7c3aed;
 $dark-bg: #141822;
 $card-bg: #1c2230;
@@ -371,7 +371,9 @@ $font-body: 'Cambria', 'Georgia', serif;
       border-radius: 16px;
       width: 100%;
       max-width: 540px;
-      overflow: hidden;
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden;
       animation: modalFadeIn 0.25s ease-out;
 
       .modal-header {

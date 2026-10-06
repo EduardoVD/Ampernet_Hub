@@ -1,8 +1,10 @@
-﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ResponsibilitiesService, ResponsibilityItem } from '../../core/services/responsibilities';
 import { AuthService } from '../../core/services/auth';
+import { ToastService } from '../../core/services/toast';
+import { ConfirmService } from '../../core/services/confirm';
 
 @Component({
   selector: 'app-matrix',
@@ -14,6 +16,8 @@ import { AuthService } from '../../core/services/auth';
 export class Matrix implements OnInit {
   private responsibilitiesService = inject(ResponsibilitiesService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
 
   currentUser = this.authService.currentUser;
   responsibilities = signal<ResponsibilityItem[]>([]);
@@ -94,7 +98,7 @@ export class Matrix implements OnInit {
 
   submitForm(): void {
     if (!this.formCity().trim() || !this.formSector().trim() || !this.formResponsible().trim()) {
-      alert('Por favor, preencha a Cidade, Setor e o Nome do Responsável.');
+      this.toastService.warning('Por favor, preencha a Cidade, Setor e o Nome do Responsável.', 'Campos Obrigatórios');
       return;
     }
 
@@ -115,11 +119,12 @@ export class Matrix implements OnInit {
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadResponsibilities();
+          this.toastService.success('Dados do responsável atualizados com sucesso!', 'Matriz');
         },
         error: (err) => {
           this.isSubmitting.set(false);
           console.error('Erro ao atualizar responsável:', err);
-          alert('Erro ao atualizar dados na matriz.');
+          this.toastService.error('Erro ao atualizar dados na matriz.', 'Erro');
         },
       });
     } else {
@@ -128,11 +133,12 @@ export class Matrix implements OnInit {
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadResponsibilities();
+          this.toastService.success('Responsável cadastrado com sucesso na matriz!', 'Cadastrado');
         },
         error: (err) => {
           this.isSubmitting.set(false);
           console.error('Erro ao cadastrar na matriz:', err);
-          alert('Erro ao cadastrar responsável na matriz.');
+          this.toastService.error('Erro ao cadastrar responsável na matriz.', 'Erro');
         },
       });
     }
@@ -141,16 +147,25 @@ export class Matrix implements OnInit {
   deleteItem(item: ResponsibilityItem, event?: Event): void {
     if (event) event.stopPropagation();
 
-    if (confirm(`Deseja remover o responsável "${item.responsible}" da cidade de ${item.city}?`)) {
-      this.responsibilitiesService.deleteResponsibility(item.id).subscribe({
-        next: () => {
-          this.responsibilities.update((list) => list.filter((r) => r.id !== item.id));
-        },
-        error: (err) => {
-          console.error('Erro ao remover responsável:', err);
-          alert('Não foi possível remover da matriz.');
-        },
-      });
-    }
+    this.confirmService.confirm({
+      title: 'Remover da Matriz',
+      message: `Deseja realmente remover o responsável "${item.responsible}" da cidade de ${item.city}?`,
+      confirmText: 'Sim, Remover',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.responsibilitiesService.deleteResponsibility(item.id).subscribe({
+          next: () => {
+            this.responsibilities.update((list) => list.filter((r) => r.id !== item.id));
+            this.toastService.success('Responsável removido da matriz com sucesso.', 'Removido');
+          },
+          error: (err) => {
+            console.error('Erro ao remover responsável:', err);
+            this.toastService.error('Não foi possível remover da matriz.', 'Erro');
+          },
+        });
+      }
+    });
   }
 }

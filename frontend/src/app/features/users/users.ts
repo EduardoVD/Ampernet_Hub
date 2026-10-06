@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService, UserItem } from '../../core/services/users';
 import { AuthService } from '../../core/services/auth';
+import { ToastService } from '../../core/services/toast';
+import { ConfirmService } from '../../core/services/confirm';
 
 @Component({
   selector: 'app-users',
@@ -14,17 +16,17 @@ import { AuthService } from '../../core/services/auth';
 export class UsersComponent implements OnInit {
   private usersService = inject(UsersService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
 
   currentUser = this.authService.currentUser;
   users = signal<UserItem[]>([]);
   isLoading = signal(false);
 
-  // Filtros
   searchTerm = signal('');
   roleFilter = signal<'all' | 'admin' | 'supervisor' | 'user'>('all');
   statusFilter = signal<'all' | 'active' | 'inactive'>('all');
 
-  // Estado do Modal (Criação / Edição)
   isModalOpen = signal(false);
   editingUserId = signal<number | null>(null);
   formName = signal('');
@@ -34,7 +36,6 @@ export class UsersComponent implements OnInit {
   formIsActive = signal(true);
   isSubmitting = signal(false);
 
-  // Estado do Modal de Redefinição de Senha
   isPasswordModalOpen = signal(false);
   targetUserForPassword = signal<UserItem | null>(null);
   newPassword = signal('');
@@ -119,12 +120,12 @@ export class UsersComponent implements OnInit {
     const id = this.editingUserId();
 
     if (!name || !email) {
-      alert('Por favor, preencha o Nome e o E-mail corporativo.');
+      this.toastService.warning('Por favor, preencha o Nome e o E-mail corporativo.', 'Campos Obrigatórios');
       return;
     }
 
     if (!id && (!password || password.length < 6)) {
-      alert('Para cadastrar um novo colaborador, informe uma senha de no mínimo 6 caracteres.');
+      this.toastService.warning('Para cadastrar um novo colaborador, informe uma senha de no mínimo 6 caracteres.', 'Senha Obrigatória');
       return;
     }
 
@@ -146,11 +147,12 @@ export class UsersComponent implements OnInit {
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadUsers();
+          this.toastService.success('Dados do colaborador atualizados com sucesso!', 'Colaboradores');
         },
         error: (err) => {
           this.isSubmitting.set(false);
           console.error('Erro ao atualizar usuário:', err);
-          alert('Erro ao atualizar usuário. Verifique se o e-mail já não está em uso.');
+          this.toastService.error('Erro ao atualizar colaborador. Verifique se o e-mail já não está em uso.', 'Erro');
         }
       });
     } else {
@@ -167,11 +169,12 @@ export class UsersComponent implements OnInit {
             this.isSubmitting.set(false);
             this.closeModal();
             this.loadUsers();
+            this.toastService.success('Novo colaborador cadastrado com sucesso!', 'Cadastrado');
           },
           error: (err) => {
             this.isSubmitting.set(false);
             console.error('Erro ao cadastrar usuário:', err);
-            alert('Erro ao cadastrar usuário. Verifique se o e-mail já está cadastrado.');
+            this.toastService.error('Erro ao cadastrar colaborador. Verifique se o e-mail já está cadastrado.', 'Erro');
           }
         });
     }
@@ -180,26 +183,37 @@ export class UsersComponent implements OnInit {
   toggleStatus(user: UserItem, event?: Event): void {
     if (event) event.stopPropagation();
 
-    // Impede que o próprio admin logado desative a si mesmo
     if (this.currentUser()?.id === user.id) {
-      alert('Você não pode desativar o seu próprio usuário logado.');
+      this.toastService.warning('Você não pode desativar o seu próprio usuário logado.', 'Ação Bloqueada');
       return;
     }
 
     const actionText = user.isActive ? 'desativar' : 'reativar';
-    if (confirm(`Deseja realmente ${actionText} a conta de "${user.name}"?`)) {
-      this.usersService.updateUser(user.id, { isActive: !user.isActive }).subscribe({
-        next: () => {
-          this.users.update((list) =>
-            list.map((u) => (u.id === user.id ? { ...u, isActive: !u.isActive } : u))
-          );
-        },
-        error: (err) => {
-          console.error('Erro ao alterar status do usuário:', err);
-          alert('Não foi possível alterar o status do usuário.');
-        }
-      });
-    }
+    this.confirmService.confirm({
+      title: `${user.isActive ? 'Desativar' : 'Reativar'} Conta`,
+      message: `Deseja realmente ${actionText} o acesso do colaborador "${user.name}"?`,
+      confirmText: user.isActive ? 'Sim, Desativar' : 'Sim, Reativar',
+      cancelText: 'Cancelar',
+      type: user.isActive ? 'warning' : 'primary'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.usersService.updateUser(user.id, { isActive: !user.isActive }).subscribe({
+          next: () => {
+            this.users.update((list) =>
+              list.map((u) => (u.id === user.id ? { ...u, isActive: !u.isActive } : u))
+            );
+            this.toastService.success(
+              `Conta de "${user.name}" ${user.isActive ? 'reativada' : 'desativada'} com sucesso.`,
+              'Status Atualizado'
+            );
+          },
+          error: (err) => {
+            console.error('Erro ao alterar status do usuário:', err);
+            this.toastService.error('Não foi possível alterar o status do colaborador.', 'Erro');
+          }
+        });
+      }
+    });
   }
 
   openResetPasswordModal(user: UserItem, event?: Event): void {
@@ -220,7 +234,7 @@ export class UsersComponent implements OnInit {
     const pass = this.newPassword().trim();
 
     if (!user || !pass || pass.length < 6) {
-      alert('A nova senha deve ter no mínimo 6 caracteres.');
+      this.toastService.warning('A nova senha deve ter no mínimo 6 caracteres.', 'Senha Inválida');
       return;
     }
 
@@ -229,12 +243,12 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.closePasswordModal();
-        alert(`Senha do usuário "${user.name}" redefinida com sucesso!`);
+        this.toastService.success(`Senha do colaborador "${user.name}" redefinida com sucesso!`, 'Senha Alterada');
       },
       error: (err) => {
         this.isSubmitting.set(false);
         console.error('Erro ao redefinir senha:', err);
-        alert('Não foi possível redefinir a senha.');
+        this.toastService.error('Não foi possível redefinir a senha.', 'Erro');
       }
     });
   }
@@ -243,21 +257,30 @@ export class UsersComponent implements OnInit {
     if (event) event.stopPropagation();
 
     if (this.currentUser()?.id === user.id) {
-      alert('Você não pode remover a sua própria conta conectada.');
+      this.toastService.warning('Você não pode remover a sua própria conta conectada.', 'Ação Bloqueada');
       return;
     }
 
-    if (confirm(`Atenção: Deseja realmente remover permanentemente o colaborador "${user.name}"?`)) {
-      this.usersService.deleteUser(user.id).subscribe({
-        next: () => {
-          this.users.update((list) => list.filter((u) => u.id !== user.id));
-        },
-        error: (err) => {
-          console.error('Erro ao excluir usuário:', err);
-          alert('Não foi possível remover o colaborador.');
-        }
-      });
-    }
+    this.confirmService.confirm({
+      title: 'Remover Colaborador',
+      message: `Atenção: Deseja realmente excluir permanentemente a conta de "${user.name}"?`,
+      confirmText: 'Sim, Excluir',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.usersService.deleteUser(user.id).subscribe({
+          next: () => {
+            this.users.update((list) => list.filter((u) => u.id !== user.id));
+            this.toastService.success('Colaborador removido com sucesso.', 'Removido');
+          },
+          error: (err) => {
+            console.error('Erro ao excluir usuário:', err);
+            this.toastService.error('Não foi possível remover o colaborador.', 'Erro');
+          }
+        });
+      }
+    });
   }
 
   formatRole(role: string): string {

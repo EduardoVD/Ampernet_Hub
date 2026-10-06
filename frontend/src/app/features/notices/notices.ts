@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NoticesService, NoticeReadStatusResponse } from '../../core/services/notices';
 import { AuthService } from '../../core/services/auth';
+import { ToastService } from '../../core/services/toast';
+import { ConfirmService } from '../../core/services/confirm';
 
 export interface NoticeDetail {
   id: string;
@@ -25,6 +27,8 @@ export interface NoticeDetail {
 export class NoticesComponent implements OnInit {
   private noticesService = inject(NoticesService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
 
   currentUser = this.authService.currentUser;
   notices = signal<NoticeDetail[]>([]);
@@ -119,7 +123,7 @@ export class NoticesComponent implements OnInit {
 
   submitCreateNotice(): void {
     if (!this.newNoticeTitle().trim() || !this.newNoticeContent().trim()) {
-      alert('Por favor, preencha o título e o conteúdo do aviso.');
+      this.toastService.warning('Por favor, preencha o título e o conteúdo do aviso.', 'Campos Obrigatórios');
       return;
     }
 
@@ -138,11 +142,12 @@ export class NoticesComponent implements OnInit {
           this.isSubmitting.set(false);
           this.closeCreateModal();
           this.loadNotices();
+          this.toastService.success('Aviso atualizado com sucesso!', 'Mural de Avisos');
         },
         error: (err: any) => {
           this.isSubmitting.set(false);
           console.error('Falha ao atualizar recado:', err);
-          alert("Erro ao atualizar recado. Verifique suas permissões.");
+          this.toastService.error('Erro ao atualizar recado. Verifique suas permissões.', 'Acesso Negado');
         }
       });
     } else {
@@ -151,11 +156,12 @@ export class NoticesComponent implements OnInit {
           this.isSubmitting.set(false);
           this.closeCreateModal();
           this.loadNotices();
+          this.toastService.success('Novo aviso publicado com sucesso no mural!', 'Publicado');
         },
         error: (err: any) => {
           this.isSubmitting.set(false);
           console.error('Erro ao cadastrar novo aviso:', err);
-          alert('Erro ao publicar aviso. Verifique suas permissões.');
+          this.toastService.error('Erro ao publicar aviso. Verifique suas permissões.', 'Acesso Negado');
         }
       });
     }
@@ -166,17 +172,26 @@ export class NoticesComponent implements OnInit {
       event.stopPropagation();
     }
 
-    if (confirm('Tem certeza que deseja excluir este aviso do mural?')) {
-      this.noticesService.deleteNotice(id).subscribe({
-        next: () => {
-          this.notices.update(items => items.filter(item => item.id !== id));
-        },
-        error: (err: any) => {
-          console.error('Erro ao excluir aviso:', err);
-          alert('Não foi possível excluir o aviso.');
-        }
-      });
-    }
+    this.confirmService.confirm({
+      title: 'Excluir Aviso do Mural',
+      message: 'Tem certeza que deseja remover permanentemente este comunicado?',
+      confirmText: 'Sim, Excluir',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.noticesService.deleteNotice(id).subscribe({
+          next: () => {
+            this.notices.update(items => items.filter(item => item.id !== id));
+            this.toastService.success('Aviso removido do mural com sucesso.', 'Removido');
+          },
+          error: (err: any) => {
+            console.error('Erro ao excluir aviso:', err);
+            this.toastService.error('Não foi possível excluir o aviso.', 'Erro');
+          }
+        });
+      }
+    });
   }
 
   openReadStatusModal(notice: NoticeDetail, event?: Event): void {
@@ -196,7 +211,7 @@ export class NoticesComponent implements OnInit {
       error: (err: any) => {
         this.isLoadingStatus.set(false);
         console.error('Erro ao carregar status de leitura:', err);
-        alert('Não foi possível carregar as informações de leitura.');
+        this.toastService.error('Não foi possível carregar as informações de leitura.', 'Erro');
         this.closeReadStatusModal();
       }
     });

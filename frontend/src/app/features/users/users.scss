@@ -37,11 +37,12 @@ $font-body: 'Cambria', 'Georgia', serif;
   overflow: hidden;
 }
 
-/* Barra Superior */
 .page-title-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
   flex-shrink: 0;
 
   .title-left {
@@ -122,13 +123,13 @@ $font-body: 'Cambria', 'Georgia', serif;
   }
 }
 
-/* Barra de Filtros */
 .filters-card {
   background-color: $card-bg;
   border-radius: 12px;
   padding: 1rem 1.25rem;
   display: flex;
-  gap: 1.25rem;
+  gap: 1.15rem;
+  flex-wrap: wrap;
   align-items: flex-end;
   flex-shrink: 0;
 
@@ -194,7 +195,6 @@ $font-body: 'Cambria', 'Georgia', serif;
   }
 }
 
-/* Container da Tabela */
 .table-container {
   background-color: $card-bg;
   border-radius: 12px;
@@ -207,10 +207,12 @@ $font-body: 'Cambria', 'Georgia', serif;
   .table-scroll {
     flex: 1;
     overflow-y: auto;
+    overflow-x: auto;
     @include hide-scrollbar;
 
     .users-table {
       width: 100%;
+      min-width: 650px;
       border-collapse: collapse;
 
       thead th {
@@ -444,7 +446,6 @@ $font-body: 'Cambria', 'Georgia', serif;
   }
 }
 
-/* Modais */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -465,8 +466,10 @@ $font-body: 'Cambria', 'Georgia', serif;
     border-radius: 16px;
     width: 90%;
     max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     animation: scaleUp 0.2s ease-out;

@@ -1,8 +1,10 @@
-﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IssuesService, IssueItem } from '../../core/services/issues';
 import { AuthService } from '../../core/services/auth';
+import { ToastService } from '../../core/services/toast';
+import { ConfirmService } from '../../core/services/confirm';
 
 @Component({
   selector: 'app-issues',
@@ -14,6 +16,8 @@ import { AuthService } from '../../core/services/auth';
 export class Issues implements OnInit {
   private issuesService = inject(IssuesService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
 
   currentUser = this.authService.currentUser;
   issues = signal<IssueItem[]>([]);
@@ -91,7 +95,7 @@ export class Issues implements OnInit {
 
   submitIssue(): void {
     if (!this.issueTitle().trim() || !this.issueDescription().trim()) {
-      alert('Por favor, preencha o título e a descrição da ocorrência.');
+      this.toastService.warning('Por favor, preencha o título e a descrição da ocorrência.', 'Campos Obrigatórios');
       return;
     }
 
@@ -113,11 +117,12 @@ export class Issues implements OnInit {
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadIssues();
+          this.toastService.success('Ocorrência atualizada com sucesso!', 'Ocorrências');
         },
         error: (err) => {
           this.isSubmitting.set(false);
           console.error('Erro ao atualizar ocorrência:', err);
-          alert('Erro ao atualizar ocorrência. Verifique suas permissões.');
+          this.toastService.error('Erro ao atualizar ocorrência. Verifique suas permissões.', 'Acesso Negado');
         },
       });
     } else {
@@ -126,11 +131,12 @@ export class Issues implements OnInit {
           this.isSubmitting.set(false);
           this.closeModal();
           this.loadIssues();
+          this.toastService.success('Ocorrência registrada com sucesso!', 'Registrado');
         },
         error: (err) => {
           this.isSubmitting.set(false);
           console.error('Erro ao cadastrar ocorrência:', err);
-          alert('Erro ao cadastrar ocorrência. Verifique suas permissões.');
+          this.toastService.error('Erro ao cadastrar ocorrência. Verifique suas permissões.', 'Acesso Negado');
         },
       });
     }
@@ -139,30 +145,50 @@ export class Issues implements OnInit {
   resolveIssue(issue: IssueItem, event?: Event): void {
     if (event) event.stopPropagation();
 
-    if (confirm(`Deseja marcar a ocorrência "${issue.title}" como resolvida agora?`)) {
-      this.issuesService.resolveIssue(issue.id).subscribe({
-        next: () => this.loadIssues(),
-        error: (err) => {
-          console.error('Erro ao resolver ocorrência:', err);
-          alert('Não foi possível resolver a ocorrência.');
-        },
-      });
-    }
+    this.confirmService.confirm({
+      title: 'Marcar Ocorrência como Resolvida',
+      message: `Deseja registrar o encerramento da ocorrência "${issue.title}" no horário atual?`,
+      confirmText: 'Sim, Marcar Resolvida',
+      cancelText: 'Cancelar',
+      type: 'primary'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.issuesService.resolveIssue(issue.id).subscribe({
+          next: () => {
+            this.loadIssues();
+            this.toastService.success(`Ocorrência "${issue.title}" marcada como resolvida!`, 'Resolvido');
+          },
+          error: (err) => {
+            console.error('Erro ao resolver ocorrência:', err);
+            this.toastService.error('Não foi possível resolver a ocorrência.', 'Erro');
+          },
+        });
+      }
+    });
   }
 
   deleteIssue(issue: IssueItem, event?: Event): void {
     if (event) event.stopPropagation();
 
-    if (confirm(`Tem certeza que deseja excluir a ocorrência "${issue.title}"?`)) {
-      this.issuesService.deleteIssue(issue.id).subscribe({
-        next: () => {
-          this.issues.update((list) => list.filter((i) => i.id !== issue.id));
-        },
-        error: (err) => {
-          console.error('Erro ao excluir ocorrência:', err);
-          alert('Não foi possível excluir a ocorrência.');
-        },
-      });
-    }
+    this.confirmService.confirm({
+      title: 'Excluir Ocorrência',
+      message: `Tem certeza que deseja remover permanentemente a ocorrência "${issue.title}"?`,
+      confirmText: 'Sim, Excluir',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.issuesService.deleteIssue(issue.id).subscribe({
+          next: () => {
+            this.issues.update((list) => list.filter((i) => i.id !== issue.id));
+            this.toastService.success('Ocorrência removida com sucesso.', 'Removido');
+          },
+          error: (err) => {
+            console.error('Erro ao excluir ocorrência:', err);
+            this.toastService.error('Não foi possível excluir a ocorrência.', 'Erro');
+          },
+        });
+      }
+    });
   }
 }
