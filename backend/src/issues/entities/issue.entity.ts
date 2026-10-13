@@ -1,9 +1,10 @@
-﻿import {
+import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
@@ -41,4 +42,7 @@ export class Issue {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt?: Date | null;
 }

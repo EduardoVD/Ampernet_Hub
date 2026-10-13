@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Issue } from './entities/issue.entity';
@@ -110,7 +110,7 @@ export class IssuesService {
 
   async remove(id: number): Promise<{ message: string }> {
     const issue = await this.findOne(id);
-    await this.issueRepository.remove(issue);
+    await this.issueRepository.softRemove(issue);
     return { message: `Ocorrência ${id} removida com sucesso.` };
   }
 }

@@ -85,7 +85,7 @@ export class NoticesService {
 
   async remove(id: number): Promise<{ message: string }> {
     const notice = await this.findOne(id);
-    await this.noticeRepository.remove(notice);
+    await this.noticeRepository.softRemove(notice);
     return { message: `Recado ${id} removido com sucesso.` };
   }
 

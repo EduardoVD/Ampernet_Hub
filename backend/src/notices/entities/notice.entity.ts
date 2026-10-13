@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
 } from 'typeorm';
 
@@ -40,4 +41,8 @@ export class Notice {
   //Português - Data de alteração atualizada automaticamente.
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  //Português - Data de exclusão lógica (soft delete) para preservação de histórico.
+  @DeleteDateColumn({ nullable: true })
+  deletedAt?: Date | null;
 }

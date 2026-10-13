@@ -6,6 +6,7 @@ import { NoticesComponent } from './features/notices/notices';
 import { Issues } from './features/issues/issues';
 import { Matrix } from './features/matrix/matrix';
 import { UsersComponent } from './features/users/users';
+import { ReportsComponent } from './features/reports/reports';
 import { authGuard, publicGuard, roleGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -19,6 +20,7 @@ export const routes: Routes = [
       { path: 'recados', component: NoticesComponent },
       { path: 'problemas', component: Issues },
       { path: 'matriz', component: Matrix },
+      { path: 'relatorios', component: ReportsComponent },
       { path: 'usuarios', component: UsersComponent, canActivate: [roleGuard(['admin'])] },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
