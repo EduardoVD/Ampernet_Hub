@@ -30,9 +30,9 @@ export class Notice {
   category!: string;
 
   //Português - Relacionamento Muitos-para-Um: Muitos recados pertencem a um único autor (User).
-  //Português - eager: true carrega automaticamente os dados do autor nas consultas.
-  @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
-  author!: User;
+  //Português - eager: true carrega automaticamente o autor; onDelete: SET NULL preserva comunicados caso autor seja excluído.
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL', nullable: true })
+  author?: User | null;
 
   //Português - Data de criação gerada automaticamente.
   @CreateDateColumn()

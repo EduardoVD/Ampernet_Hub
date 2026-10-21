@@ -1,6 +1,9 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   ReportsService,
   IssueHistoryItem,
@@ -24,8 +27,13 @@ export class ReportsComponent implements OnInit {
   private noticesService = inject(NoticesService);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   currentUser = this.authService.currentUser;
+
+  // Streams de busca com debounce reativo (350ms)
+  private issueSearch$ = new Subject<string>();
+  private noticeSearch$ = new Subject<string>();
 
   // Apenas Admin e Supervisor podem extrair relatórios (CSV e Impressão) e visualizar métricas/estatísticas
   canExport = computed(() => {
@@ -67,8 +75,31 @@ export class ReportsComponent implements OnInit {
   isLoadingReadStatus = signal(false);
 
   ngOnInit(): void {
+    // Escuta de busca reativa debounced
+    this.issueSearch$
+      .pipe(debounceTime(350), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadData();
+      });
+
+    this.noticeSearch$
+      .pipe(debounceTime(350), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadData();
+      });
+
     this.applyPreset('30days', false);
     this.loadData();
+  }
+
+  onIssueSearchInput(value: string): void {
+    this.issueSearch.set(value);
+    this.issueSearch$.next(value);
+  }
+
+  onNoticeSearchInput(value: string): void {
+    this.noticeSearch.set(value);
+    this.noticeSearch$.next(value);
   }
 
   setTab(tab: 'issues' | 'notices'): void {
@@ -79,7 +110,14 @@ export class ReportsComponent implements OnInit {
   applyPreset(preset: 'today' | '7days' | '30days' | 'month' | 'all' | 'custom', reload = true): void {
     this.periodPreset.set(preset);
     const today = new Date();
-    const formatYMD = (d: Date) => d.toISOString().slice(0, 10);
+
+    // Tratamento de fuso local: decompõe ano/mês/dia garantindo precisão mesmo após as 21h em fuso UTC-3
+    const formatYMD = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
     if (preset === 'today') {
       const dStr = formatYMD(today);

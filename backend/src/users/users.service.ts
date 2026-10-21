@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
   OnModuleInit,
   Logger,
 } from '@nestjs/common';
@@ -84,9 +85,11 @@ export class UsersService implements OnModuleInit {
 
   //Português - Método assíncrono para criar um novo usuário no sistema.
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const normalizedEmail = createUserDto.email.trim().toLowerCase();
+
     //Português - Verifica se já existe um usuário cadastrado com o mesmo e-mail.
     const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { email: normalizedEmail },
     });
 
     //Português - Lança erro HTTP 409 (Conflict) se o e-mail já estiver em uso.
@@ -101,11 +104,14 @@ export class UsersService implements OnModuleInit {
     //Português - Instancia a nova entidade substituindo a senha em texto puro pelo hash.
     const newUser = this.userRepository.create({
       ...createUserDto,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
-    //Português - Salva o novo registro na tabela 'users' do MySQL e retorna os dados. 
-    return await this.userRepository.save(newUser);
+    //Português - Salva o novo registro na tabela 'users' do MySQL e retorna os dados sem o hash de senha. 
+    const savedUser = await this.userRepository.save(newUser);
+    const { password: _, ...userWithoutPassword } = savedUser;
+    return userWithoutPassword as User;
   }
 
   //Português - Método para listar todos os usuários cadastrados.
@@ -125,32 +131,84 @@ export class UsersService implements OnModuleInit {
     return user;
   }
 
-  //Português - Método de consulta por e-mail (Usado internamente pelo fluxo de login/JWT, incluindo a senha para validação).
+  //Português - Método de consulta por e-mail com normalização case-insensitive.
   async findByEmail(email: string): Promise<User | null> {
+    const normalizedEmail = email.trim().toLowerCase();
     return await this.userRepository
       .createQueryBuilder('user')
       .addSelect('user.password')
-      .where('user.email = :email', { email })
+      .where('LOWER(user.email) = LOWER(:email)', { email: normalizedEmail })
       .getOne();
   }
 
-  //Português - Método para atualizar informações de um usuário existente.
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  //Português - Método para atualizar informações de um usuário existente com salvaguardas de segurança.
+  async update(id: number, updateUserDto: UpdateUserDto, currentUserId?: number): Promise<User> {
     const user = await this.findOne(id);
 
-    //Português - Se uma nova senha for informada no update, aplica o hash antes de salvar.
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    // 1. Tratamento seguro de senha: se vazia ou ausente, deleta do DTO para não sobrescrever o hash salvo
+    if (updateUserDto.password && updateUserDto.password.trim().length > 0) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password.trim(), 10);
+    } else {
+      delete updateUserDto.password;
+    }
+
+    // 2. Normalização e validação de e-mail único se alterado
+    if (updateUserDto.email) {
+      updateUserDto.email = updateUserDto.email.trim().toLowerCase();
+      if (updateUserDto.email !== user.email) {
+        const emailInUse = await this.userRepository.findOne({
+          where: { email: updateUserDto.email },
+        });
+        if (emailInUse) {
+          throw new ConflictException('Este e-mail já está em uso por outro usuário');
+        }
+      }
+    }
+
+    // 3. Regra de segurança: Não permitir auto-desativação do admin conectado
+    if (currentUserId && id === currentUserId && updateUserDto.isActive === false) {
+      throw new BadRequestException('Você não pode desativar sua própria conta de administrador.');
+    }
+
+    // 4. Regra de segurança: Garantir que o sistema nunca fique sem nenhum administrador ativo
+    if (
+      user.role === UserRole.ADMIN &&
+      (updateUserDto.isActive === false || (updateUserDto.role && updateUserDto.role !== UserRole.ADMIN))
+    ) {
+      const activeAdminCount = await this.userRepository.count({
+        where: { role: UserRole.ADMIN, isActive: true },
+      });
+      if (activeAdminCount <= 1) {
+        throw new BadRequestException('Operação bloqueada: o sistema precisa manter ao menos um administrador ativo.');
+      }
     }
 
     //Português - Mescla as alterações na entidade existente e grava no banco.
     this.userRepository.merge(user, updateUserDto);
-    return await this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+    const { password: _, ...userWithoutPassword } = savedUser;
+    return userWithoutPassword as User;
   }
 
-  //Português - Método para remover um registro de usuário do banco.
-  async remove(id: number): Promise<{ message: string }> {
+  //Português - Método para remover um registro com salvaguardas contra auto-exclusão e exclusão do último admin.
+  async remove(id: number, currentUserId?: number): Promise<{ message: string }> {
     const user = await this.findOne(id);
+
+    // 1. Regra de segurança: Impedir que o administrador exclua sua própria conta ativa
+    if (currentUserId && id === currentUserId) {
+      throw new BadRequestException('Você não pode excluir sua própria conta de administrador conectada.');
+    }
+
+    // 2. Regra de segurança: Impedir excluir o único administrador restante
+    if (user.role === UserRole.ADMIN) {
+      const adminCount = await this.userRepository.count({
+        where: { role: UserRole.ADMIN },
+      });
+      if (adminCount <= 1) {
+        throw new BadRequestException('Operação bloqueada: não é possível excluir o único administrador do sistema.');
+      }
+    }
+
     await this.userRepository.remove(user);
     return { message: `Usuário ${id} removido com sucesso` };
   }

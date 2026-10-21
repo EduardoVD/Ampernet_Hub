@@ -105,10 +105,16 @@ export class ReportsService {
 
   /**
    * Exporta conjunto de dados para CSV com suporte nativo a acentuação (BOM UTF-8)
+   * e proteção contra injeção de fórmulas CSV (CSV Formula Injection / DDE).
    */
   exportToCsv(filename: string, headers: string[], rows: (string | number)[][]): void {
     const escapeCell = (val: string | number) => {
-      const str = String(val ?? '').replace(/"/g, '""');
+      let str = String(val ?? '');
+      // Proteção contra CSV Formula Injection: se o valor começar com =, +, -, @ ou tabulação, prefixa com apóstrofo
+      if (/^[=+\-@\t\r]/.test(str)) {
+        str = `'${str}`;
+      }
+      str = str.replace(/"/g, '""');
       return `"${str}"`;
     };
 

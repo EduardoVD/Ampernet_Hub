@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -31,8 +31,9 @@ export class IssuesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar todas as ocorrências e problemas gerais' })
   @ApiQuery({ name: 'status', enum: IssueStatus, required: false, description: 'Filtrar por status' })
-  findAll(@Query('status') status?: IssueStatus) {
-    return this.issuesService.findAll(status);
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limite de registros para performance (padrão: 100)' })
+  findAll(@Query('status') status?: IssueStatus, @Query('limit') limit?: number) {
+    return this.issuesService.findAll(status, limit ? Number(limit) : undefined);
   }
 
   @Get(':id')

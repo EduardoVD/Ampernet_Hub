@@ -39,7 +39,17 @@ export class LoginComponent {
       },
       error: (err) => {
         console.error('Falha na autenticação:', err);
-        this.toastService.error('Credenciais inválidas ou servidor indisponível.', 'Falha no Acesso');
+        if (err.status === 429) {
+          this.toastService.error(
+            'Muitas tentativas consecutivas de acesso. Por segurança, aguarde 1 minuto e tente novamente.',
+            'Bloqueio Temporário'
+          );
+        } else if (err.status === 401) {
+          const message = err.error?.message || 'E-mail ou senha incorretos.';
+          this.toastService.error(message, 'Falha no Acesso');
+        } else {
+          this.toastService.error('Erro de conexão com o servidor. Tente novamente mais tarde.', 'Falha no Acesso');
+        }
       }
     });
   }

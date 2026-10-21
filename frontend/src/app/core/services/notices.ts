@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -8,7 +8,7 @@ export interface NoticeResponse {
   title: string;
   content: string;
   category: string;
-  author: { id: number; name: string; email: string };
+  author?: { id: number; name: string; email: string } | null;
   createdAt: string;
   updatedAt?: string;
   isRead: boolean;
@@ -39,49 +39,28 @@ export class NoticesService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/notices`;
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      Authorization: `Bearer ${token || ''}`
-    });
-  }
-
   getNotices(): Observable<NoticeResponse[]> {
-    return this.http.get<NoticeResponse[]>(this.apiUrl, {
-      headers: this.getHeaders()
-    });
+    return this.http.get<NoticeResponse[]>(this.apiUrl);
   }
 
   markAsRead(id: string | number): Observable<{ message: string }> {
-    return this.http.patch<{ message: string }>(
-      `${this.apiUrl}/${id}/read`,
-      {},
-      { headers: this.getHeaders() }
-    );
+    return this.http.patch<{ message: string }>(`${this.apiUrl}/${id}/read`, {});
   }
 
   createNotice(dto: { title: string; content: string; category?: string }): Observable<NoticeResponse> {
-    return this.http.post<NoticeResponse>(this.apiUrl, dto, {
-      headers: this.getHeaders()
-    });
+    return this.http.post<NoticeResponse>(this.apiUrl, dto);
   }
 
-  updateNotice(id: string | number, dto: { title: string; content: string; category?: string}): Observable<NoticeResponse> {
-      return this.http.patch<NoticeResponse>(`${this.apiUrl}/${id}`, dto, {
-        headers: this.getHeaders()
-      });
-    }
+  updateNotice(id: string | number, dto: { title: string; content: string; category?: string }): Observable<NoticeResponse> {
+    return this.http.patch<NoticeResponse>(`${this.apiUrl}/${id}`, dto);
+  }
 
   deleteNotice(id: string | number): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, {
-      headers: this.getHeaders()
-    });
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 
   getReadStatus(noticeId: string | number): Observable<NoticeReadStatusResponse> {
-    return this.http.get<NoticeReadStatusResponse>(`${this.apiUrl}/${noticeId}/read-status`, {
-      headers: this.getHeaders()
-    });
+    return this.http.get<NoticeReadStatusResponse>(`${this.apiUrl}/${noticeId}/read-status`);
   }
 }
 

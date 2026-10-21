@@ -1,4 +1,3 @@
-//Português - Importa os decorators de rota e parâmetros HTTP do NestJS.
 import {
   Controller,
   Get,
@@ -9,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 
 //Português - Importa os decorators de autenticação, permissão e Swagger.
@@ -65,20 +65,23 @@ export class UsersController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar informações de um usuário existente' })
   @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.' })
+  @ApiResponse({ status: 400, description: 'Tentativa de desativar o próprio admin ou único admin.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
+    @Request() req: any,
   ) {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(id, updateUserDto, req.user?.id);
   }
 
   //Português - Rota DELETE /users/:id: Exclusão de usuário.
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um usuário do sistema' })
   @ApiResponse({ status: 200, description: 'Usuário removido com sucesso.' })
+  @ApiResponse({ status: 400, description: 'Tentativa de excluir o próprio admin ou único admin.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    return this.usersService.remove(id, req.user?.id);
   }
 }

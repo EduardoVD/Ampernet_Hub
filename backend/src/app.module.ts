@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { NoticesModule } from './notices/notices.module';
@@ -15,6 +17,13 @@ import { ReportsModule } from './reports/reports.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    //Português - Rate Limiting global (Proteção contra sobrecarga e abuso de requisições).
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 120, // 120 requisições por minuto por IP para uso geral
+      },
+    ]),
     //Português - Conexão assíncrona com o MySQL usando variáveis de ambiente.
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -26,7 +35,11 @@ import { ReportsModule } from './reports/reports.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE', 'amper_hub_db'),
         autoLoadEntities: true,
-        synchronize: configService.get<string>('DB_SYNCHRONIZE', 'true') === 'true',
+        // Em produção, desativa synchronize para prevenir perda acidental de dados.
+        synchronize:
+          configService.get<string>('NODE_ENV') === 'production'
+            ? false
+            : configService.get<string>('DB_SYNCHRONIZE', 'true') === 'true',
       }),
     }),
     UsersModule,
@@ -35,6 +48,12 @@ import { ReportsModule } from './reports/reports.module';
     IssuesModule,
     ResponsibilitiesModule,
     ReportsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 //Português - Exporta a classe do módulo raiz para ser instanciada no main.ts.

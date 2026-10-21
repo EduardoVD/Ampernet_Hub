@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -77,7 +77,9 @@ export class IssuesService {
     let formattedStarted = '';
     if (item.startedAt) {
       const d = new Date(item.startedAt);
-      formattedStarted = `${d.toLocaleDateString('pt-BR')} · ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      if (!isNaN(d.getTime())) {
+        formattedStarted = `${d.toLocaleDateString('pt-BR')} · ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      }
     }
 
     let formattedResolved: string | undefined = undefined;
@@ -85,18 +87,23 @@ export class IssuesService {
 
     if (item.status === 'resolved' && item.resolvedAt) {
       const dRes = new Date(item.resolvedAt);
-      formattedResolved = `${dRes.toLocaleDateString('pt-BR')} · ${dRes.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      if (!isNaN(dRes.getTime())) {
+        formattedResolved = `${dRes.toLocaleDateString('pt-BR')} · ${dRes.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-      if (item.startedAt) {
-        const diffMs = dRes.getTime() - new Date(item.startedAt).getTime();
-        const totalMinutes = Math.max(0, Math.floor(diffMs / 60000));
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
+        if (item.startedAt) {
+          const dStart = new Date(item.startedAt);
+          if (!isNaN(dStart.getTime())) {
+            const diffMs = Math.max(0, dRes.getTime() - dStart.getTime());
+            const totalMinutes = Math.floor(diffMs / 60000);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
 
-        if (hours > 0) {
-          durationText = `${hours}h ${minutes}min · Tempo Total`;
-        } else {
-          durationText = `${minutes}min · Tempo Total`;
+            if (hours > 0) {
+              durationText = `${hours}h ${minutes}min · Tempo Total`;
+            } else {
+              durationText = `${minutes}min · Tempo Total`;
+            }
+          }
         }
       }
     }

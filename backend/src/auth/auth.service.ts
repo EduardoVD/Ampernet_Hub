@@ -15,8 +15,8 @@ export class AuthService {
 
   //Português - Método de autenticação e geração de Token.
   async login(loginDto: LoginDto) {
-    //Português - Busca o usuário pelo e-mail informado.
-    const user = await this.usersService.findByEmail(loginDto.email);
+    //Português - Busca o usuário pelo e-mail informado (normalizado para minúsculas).
+    const user = await this.usersService.findByEmail(loginDto.email.trim().toLowerCase());
 
     //Português - Valida se o usuário existe e se a conta está ativa.
     if (!user) {

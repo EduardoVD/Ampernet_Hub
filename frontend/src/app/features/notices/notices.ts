@@ -57,7 +57,10 @@ export class NoticesComponent implements OnInit {
     this.noticesService.getNotices().subscribe({
       next: (data) => {
         const formatted = data.map((item) => {
-          const authorName = typeof item.author === 'object' ? item.author?.name : (item.author || 'Equipe');
+          const authorName =
+            item.author && typeof item.author === 'object'
+              ? item.author.name || 'Administração'
+              : item.author || 'Administração';
           
           const createdDate = new Date(item.createdAt);
           const formattedCreated = `${createdDate.toLocaleDateString('pt-BR')} · ${createdDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;

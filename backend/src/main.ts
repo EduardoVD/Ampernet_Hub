@@ -2,10 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+
 //Português - Função assíncrona principal que inicializa o ciclo de vida do servidor.
 async function bootstrap() {
   //Português - Cria a instância principal da aplicação HTTP baseada no AppModule.
   const app = await NestFactory.create(AppModule);
+
+  //Português - Headers HTTP de segurança (proteção contra Clickjacking, sniffing de MIME e vazamentos).
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Preserva integridade visual do Swagger UI (/api)
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   //Português - Configura o CORS com as origens permitidas da aplicação e métodos aceitos.
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
@@ -16,10 +27,14 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
-  //Português - Ativa a validação global de DTOs descartando propriedades não declaradas (whitelist).
+  //Português - Filtro global de exceções para padronização de erros e prevenção de vazamento de dados internos.
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  //Português - Ativa a validação global de DTOs descartando propriedades não declaradas e rejeitando campos intrusos.
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
     }),
   );

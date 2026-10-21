@@ -24,6 +24,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('Acesso Não Autorizado!');
     }
+    // Garante revogação imediata se a conta for inativada enquanto o token ainda estiver válido
+    if (!user.isActive) {
+      throw new UnauthorizedException('Conta de usuário inativa! Acesso negado.');
+    }
     return user;
   }
 }

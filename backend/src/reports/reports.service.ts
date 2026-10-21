@@ -22,6 +22,22 @@ export class ReportsService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  private parseDateBoundary(dateStr: string, isEnd = false): Date {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      return isEnd
+        ? new Date(y, m, d, 23, 59, 59, 999)
+        : new Date(y, m, d, 0, 0, 0, 0);
+    }
+    const dt = new Date(dateStr);
+    if (isEnd) dt.setHours(23, 59, 59, 999);
+    else dt.setHours(0, 0, 0, 0);
+    return dt;
+  }
+
   async getIssuesReport(query: IssuesReportQueryDto, isPrivileged = false) {
     const qb = this.issueRepository.createQueryBuilder('issue')
       .leftJoinAndSelect('issue.author', 'author')
@@ -31,15 +47,14 @@ export class ReportsService {
       qb.withDeleted();
     }
 
+    // Tratamento de fuso horário local: decompõe ano/mês/dia para evitar salto de UTC
     if (query.startDate) {
-      const start = new Date(query.startDate);
-      start.setHours(0, 0, 0, 0);
+      const start = this.parseDateBoundary(query.startDate, false);
       qb.andWhere('issue.startedAt >= :start', { start });
     }
 
     if (query.endDate) {
-      const end = new Date(query.endDate);
-      end.setHours(23, 59, 59, 999);
+      const end = this.parseDateBoundary(query.endDate, true);
       qb.andWhere('issue.startedAt <= :end', { end });
     }
 
@@ -54,6 +69,9 @@ export class ReportsService {
         { term },
       );
     }
+
+    // Teto de segurança para evitar estouro de memória em datasets massivos
+    qb.take(1000);
 
     const items = await qb.getMany();
 
@@ -150,15 +168,14 @@ export class ReportsService {
       qb.withDeleted();
     }
 
+    // Tratamento de fuso horário local: decompõe ano/mês/dia para evitar salto de UTC
     if (query.startDate) {
-      const start = new Date(query.startDate);
-      start.setHours(0, 0, 0, 0);
+      const start = this.parseDateBoundary(query.startDate, false);
       qb.andWhere('notice.createdAt >= :start', { start });
     }
 
     if (query.endDate) {
-      const end = new Date(query.endDate);
-      end.setHours(23, 59, 59, 999);
+      const end = this.parseDateBoundary(query.endDate, true);
       qb.andWhere('notice.createdAt <= :end', { end });
     }
 
@@ -173,6 +190,9 @@ export class ReportsService {
         { term },
       );
     }
+
+    // Teto de segurança para evitar estouro de memória em datasets massivos
+    qb.take(1000);
 
     const notices = await qb.getMany();
 

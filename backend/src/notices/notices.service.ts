@@ -27,9 +27,10 @@ export class NoticesService {
   }
 
   //Português - Lista todos os recados e marca se o usuário autenticado já os leu.
-  async findAll(userId?: number): Promise<any[]> {
+  async findAll(userId?: number, limit = 100): Promise<any[]> {
     const notices = await this.noticeRepository.find({
       order: { createdAt: 'DESC' },
+      take: limit > 0 ? limit : 100,
     });
 
     if (!userId) {

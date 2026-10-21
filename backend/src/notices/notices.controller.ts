@@ -1,4 +1,3 @@
-//Português - Importa decorators do NestJS para manipulação de rotas, injeção e autenticação.
 import {
   Controller,
   Get,
@@ -7,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   UseGuards,
   Request,
   ParseIntPipe,
@@ -18,7 +18,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
 
 //Português - Importa os decorators do Swagger para documentação e suporte ao Bearer Token.
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 //Português - Importa o serviço e os DTOs do recurso de recados.
 import { NoticesService } from './notices.service';
@@ -49,8 +49,9 @@ export class NoticesController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar todos os avisos do mural com status de leitura' })
-  findAll(@Request() req: any) {
-    return this.noticesService.findAll(req.user?.id);
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limite de registros para performance (padrão: 100)' })
+  findAll(@Request() req: any, @Query('limit') limit?: number) {
+    return this.noticesService.findAll(req.user?.id, limit ? Number(limit) : undefined);
   }
 
   //Português - Rota GET /notices/:id: Consulta de um recado por ID.

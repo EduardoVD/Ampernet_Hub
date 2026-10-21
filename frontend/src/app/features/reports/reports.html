@@ -131,7 +131,7 @@
               type="text"
               placeholder="Buscar título, descrição ou operador..."
               [ngModel]="issueSearch()"
-              (ngModelChange)="issueSearch.set($event)"
+              (ngModelChange)="onIssueSearchInput($event)"
               (keyup.enter)="loadData()"
             />
           </div>
@@ -142,7 +142,7 @@
             <input
               type="checkbox"
               [ngModel]="includeDeletedIssues()"
-              (ngModelChange)="includeDeletedIssues.set($event)"
+              (ngModelChange)="includeDeletedIssues.set($event); loadData()"
             />
             <span>Incluir Removidos</span>
           </label>
@@ -153,7 +153,7 @@
       <ng-container *ngIf="activeTab() === 'notices'">
         <div class="control-group">
           <label>Categoria:</label>
-          <select [ngModel]="noticeCategory()" (ngModelChange)="noticeCategory.set($event)">
+          <select [ngModel]="noticeCategory()" (ngModelChange)="noticeCategory.set($event); loadData()">
             <option value="all">Todas as Categorias</option>
             <option value="Geral">Geral</option>
             <option value="Procedimentos">Procedimentos</option>
@@ -173,7 +173,7 @@
               type="text"
               placeholder="Buscar comunicado ou autor..."
               [ngModel]="noticeSearch()"
-              (ngModelChange)="noticeSearch.set($event)"
+              (ngModelChange)="onNoticeSearchInput($event)"
               (keyup.enter)="loadData()"
             />
           </div>
@@ -184,7 +184,7 @@
             <input
               type="checkbox"
               [ngModel]="includeDeletedNotices()"
-              (ngModelChange)="includeDeletedNotices.set($event)"
+              (ngModelChange)="includeDeletedNotices.set($event); loadData()"
             />
             <span>Incluir Removidos</span>
           </label>

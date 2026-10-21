@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Issue } from './entities/issue.entity';
@@ -24,6 +24,12 @@ export class IssuesService {
       resolvedAt = createIssueDto.resolvedAt
         ? new Date(createIssueDto.resolvedAt)
         : new Date();
+
+      if (resolvedAt < startedAt) {
+        throw new BadRequestException(
+          'A data de término não pode ser anterior à data de início da ocorrência.',
+        );
+      }
     }
 
     const issue = this.issueRepository.create({
@@ -38,16 +44,19 @@ export class IssuesService {
     return await this.issueRepository.save(issue);
   }
 
-  async findAll(status?: IssueStatus): Promise<Issue[]> {
+  async findAll(status?: IssueStatus, limit = 100): Promise<Issue[]> {
     const query = this.issueRepository
       .createQueryBuilder('issue')
       .leftJoinAndSelect('issue.author', 'author')
-      .orderBy('CASE WHEN issue.status = :ongoing THEN 0 ELSE 1 END', 'ASC')
-      .addOrderBy('issue.startedAt', 'DESC')
-      .setParameter('ongoing', IssueStatus.ONGOING);
+      .orderBy('issue.status', 'ASC')
+      .addOrderBy('issue.startedAt', 'DESC');
 
     if (status) {
       query.andWhere('issue.status = :status', { status });
+    }
+
+    if (limit && limit > 0) {
+      query.take(limit);
     }
 
     return await query.getMany();
@@ -75,19 +84,34 @@ export class IssuesService {
 
     if (updateIssueDto.status) {
       issue.status = updateIssueDto.status;
-      if (issue.status === IssueStatus.RESOLVED && !issue.resolvedAt) {
-        issue.resolvedAt = updateIssueDto.resolvedAt
-          ? new Date(updateIssueDto.resolvedAt)
-          : new Date();
+      if (issue.status === IssueStatus.RESOLVED) {
+        if (!issue.resolvedAt) {
+          issue.resolvedAt = updateIssueDto.resolvedAt
+            ? new Date(updateIssueDto.resolvedAt)
+            : new Date();
+        }
       } else if (issue.status === IssueStatus.ONGOING) {
         issue.resolvedAt = null;
       }
     }
 
     if (updateIssueDto.resolvedAt !== undefined) {
-      issue.resolvedAt = updateIssueDto.resolvedAt
-        ? new Date(updateIssueDto.resolvedAt)
-        : null;
+      if (issue.status === IssueStatus.RESOLVED) {
+        issue.resolvedAt = updateIssueDto.resolvedAt
+          ? new Date(updateIssueDto.resolvedAt)
+          : null;
+      } else {
+        issue.resolvedAt = null;
+      }
+    }
+
+    // Validação cronológica: término nunca pode ser anterior ao início
+    if (issue.status === IssueStatus.RESOLVED && issue.resolvedAt && issue.startedAt) {
+      if (issue.resolvedAt < issue.startedAt) {
+        throw new BadRequestException(
+          'A data de término não pode ser anterior à data de início da ocorrência.',
+        );
+      }
     }
 
     if (updateIssueDto.title) {
@@ -103,6 +127,10 @@ export class IssuesService {
 
   async resolve(id: number): Promise<Issue> {
     const issue = await this.findOne(id);
+    // Caso de borda: idempotência e proteção contra concorrência (não sobrescreve resolução histórica)
+    if (issue.status === IssueStatus.RESOLVED) {
+      return issue;
+    }
     issue.status = IssueStatus.RESOLVED;
     issue.resolvedAt = new Date();
     return await this.issueRepository.save(issue);
