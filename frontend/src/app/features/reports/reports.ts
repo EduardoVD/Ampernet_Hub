@@ -14,11 +14,12 @@ import {
 import { NoticesService, NoticeReadStatusResponse } from '../../core/services/notices';
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   templateUrl: './reports.html',
   styleUrls: ['./reports.scss'],
 })
@@ -49,8 +50,8 @@ export class ReportsComponent implements OnInit {
   activeTab = signal<'issues' | 'notices'>('issues');
   isLoading = signal(false);
 
-  // Filtros Temporais
-  periodPreset = signal<'today' | '7days' | '30days' | 'month' | 'all' | 'custom'>('30days');
+  // Filtros Temporais (Personalizado como padrão direto)
+  periodPreset = signal<'today' | '7days' | '30days' | 'month' | 'all' | 'custom'>('custom');
   startDate = signal('');
   endDate = signal('');
 
@@ -89,6 +90,7 @@ export class ReportsComponent implements OnInit {
       });
 
     this.applyPreset('30days', false);
+    this.periodPreset.set('custom');
     this.loadData();
   }
 

@@ -1,3 +1,5 @@
+@use './styles/tokens' as *;
+
 * {
   margin: 0;
   padding: 0;
@@ -9,4 +11,60 @@ html, body {
   height: 100%;
   overflow: hidden;
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: $dark-bg;
+  background-image: radial-gradient(circle at 50% 0%, rgba($accent, 0.03) 0%, transparent 70%);
+  color: $text-light;
+  color-scheme: dark;
+  accent-color: $accent;
 }
+
+::selection {
+  background-color: rgba($accent, 0.35);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid rgba($accent-light, 0.75);
+  outline-offset: 2px;
+}
+
+table,
+.tabular-nums,
+.kpi-card,
+.stat-value,
+.meta-info .value {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Transição de entrada suave entre telas/rotas
+.page-content-area > :not(router-outlet) {
+  animation: pageFadeIn $dur-base $ease-out;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-content-area > :not(router-outlet) {
+    animation: none !important;
+  }
+}
+
+

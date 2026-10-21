@@ -1,0 +1,248 @@
+@use 'sass:list';
+
+// ============================================================================
+// Design tokens — paleta AmperCore (Ampernet Telecom)
+// Cores amostradas diretamente das telas do AmperCore (Login, Amper.Log, Amper.Daily).
+// Fonte única de verdade: nenhum componente deve declarar cor própria.
+// ============================================================================
+
+// --- Tipografia ------------------------------------------------------------
+$font-title: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+$font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+// --- Superfícies (cinzas neutros quentes) ----------------------------------
+$bg-sidebar: #231f20;      // sidebar / painel de marca do login (cinza quente)
+$dark-bg: #18181a;         // fundo base da aplicação
+$card-bg: #212123;         // cards e painéis elevados
+$card-bg-raised: #2a2a2c;  // hover de cards, cabeçalhos de tabela
+$input-bg: #18181a;        // caixas internas / inputs (um nível abaixo do card)
+$input-focus: #1d1d1f;
+
+// --- Bordas ----------------------------------------------------------------
+$border-subtle: #2e2e31;
+$border-strong: #424244;
+
+// --- Texto -----------------------------------------------------------------
+$text-light: #ffffff;
+$text-soft: #e4e4e7;
+$text-muted: #9b9b9f;
+$text-dim: #6e6e73;
+
+// --- Marca (vermelho Ampernet) ---------------------------------------------
+$accent: #ef4433;          // botão principal, item ativo do menu
+$accent-strong: #d12e1e;   // botões secundários da marca (ex.: "Painel")
+$accent-light: #ff6f61;    // texto/links sobre fundo escuro
+$accent-pale: #ffd9d4;
+
+// --- Estados ---------------------------------------------------------------
+$success: #a0d43b;         // lima: barra lateral e selo "Resolvido"
+$success-bg: #2d371d;
+$warning: #f5b53d;
+$warning-strong: #d9941e;
+$danger: $accent;          // problema em andamento = vermelho da marca
+$info: #b8b8bd;            // informativo neutro (a paleta não tem azul)
+$neutral-strong: #5f5f65;
+
+// --- Bordas translúcidas (sobre qualquer superfície) -------------------------
+$line-faint: rgba(255, 255, 255, 0.06);   // divisórias internas, borda padrão de card
+$line-soft: rgba(255, 255, 255, 0.1);     // borda de inputs / botões secundários
+$line-hover: rgba(255, 255, 255, 0.16);   // borda de card/input em hover
+
+// --- Raios (3 níveis + pílula) ----------------------------------------------
+$radius-sm: 6px;    // badges, chips, ícones pequenos
+$radius-md: 10px;   // botões, inputs, itens de menu
+$radius-lg: 14px;   // cards, painéis, modais
+$radius-pill: 999px;
+
+// --- Movimento ----------------------------------------------------------------
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$dur-fast: 120ms;   // hover / press
+$dur-base: 200ms;   // foco, abertura de elementos
+$dur-slow: 320ms;   // entrada de página
+
+// --- Superfícies com "luz" (substitui o sólido chapado) ------------------------
+// Brilho quase imperceptível no topo, como luz incidindo sobre o card.
+$surface-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0) 42%);
+// Realce interno de 1px no topo (não é sombra projetada; mantém o visual plano).
+$edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+// --- Anel de foco (teclado) ---------------------------------------------------
+$focus-ring-color: rgba($accent-light, 0.75);
+
+// ============================================================================
+// Mixins
+// ============================================================================
+
+@mixin hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+// Transição restrita às propriedades informadas (evita `transition: all`).
+// Uso: @include transition(background-color, border-color, color);
+@mixin transition($props...) {
+  $list: ();
+  @each $p in $props {
+    $list: list.append($list, $p $dur-fast $ease-out, comma);
+  }
+  transition: $list;
+}
+
+// Anel de foco visível apenas na navegação por teclado.
+@mixin focus-ring($offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid $focus-ring-color;
+    outline-offset: $offset;
+  }
+}
+
+// Superfície padrão de card/painel: plana, com brilho sutil e borda fina.
+@mixin surface-card($radius: $radius-lg) {
+  background-color: $card-bg;
+  background-image: $surface-sheen;
+  border: 1px solid $line-faint;
+  border-radius: $radius;
+  box-shadow: $edge-highlight;
+}
+
+// Hover de card interativo: a borda "acende", sem sombra projetada.
+@mixin surface-card-hover {
+  @include transition(border-color, background-color);
+  &:hover {
+    border-color: $line-hover;
+  }
+}
+
+// --- Botões -------------------------------------------------------------------
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: $radius-md;
+  font-family: $font-title;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  @include transition(background-color, border-color, color, transform, filter);
+  @include focus-ring;
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Ação principal: gradiente vertical sutil + realce interno; sem glow.
+@mixin btn-primary {
+  @include btn-base;
+  color: #ffffff;
+  border: 1px solid rgba($accent-strong, 0.9);
+  background-color: $accent;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+}
+
+// Ação secundária: contorno neutro.
+@mixin btn-secondary {
+  @include btn-base;
+  color: $text-soft;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid $line-soft;
+
+  &:hover:not(:disabled) {
+    color: $text-light;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: $line-hover;
+  }
+}
+
+// Ação discreta: sem borda até o hover.
+@mixin btn-ghost {
+  @include btn-base;
+  color: $text-muted;
+  background-color: transparent;
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    color: $text-light;
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+// Ação destrutiva sólida (ex.: confirmar exclusão).
+@mixin btn-danger {
+  @include btn-primary;
+}
+
+// --- Campos de formulário -----------------------------------------------------
+@mixin input-field {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid $line-soft;
+  border-radius: $radius-md;
+  color: $text-light;
+  font-family: $font-title;
+  font-size: 0.9rem;
+  outline: none;
+  @include transition(border-color, background-color, box-shadow);
+
+  &::placeholder {
+    color: $text-dim;
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: $line-hover;
+  }
+
+  &:focus {
+    border-color: rgba($accent, 0.8);
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 3px rgba($accent, 0.18);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+// --- Rótulos de seção (labels de formulário / metadados) ----------------------
+@mixin eyebrow {
+  font-family: $font-title;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $text-muted;
+}
+
+// --- Skeleton de carregamento ---------------------------------------------------
+@mixin skeleton {
+  background-color: rgba(255, 255, 255, 0.04);
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0) 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  border-radius: $radius-sm;
+  color: transparent;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: skeleton-shimmer 1.4s $ease-out infinite;
+  }
+}
+
+

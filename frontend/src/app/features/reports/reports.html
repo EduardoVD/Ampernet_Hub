@@ -3,7 +3,7 @@
   <div class="print-header">
     <div class="print-title-area">
       <h2>AMPERNET - AMPERHUB</h2>
-      <h3>Relatório Oficial de Histórico e Auditoria</h3>
+      <h3>RElaTÓRIO DE HISTÓRICO E AUDITORIA</h3>
     </div>
     <div class="print-meta">
       <p><strong>Módulo:</strong> {{ activeTab() === 'issues' ? 'Problemas Gerais e Rompimentos' : 'Mural de Avisos e Comunicados' }}</p>
@@ -67,7 +67,6 @@
         <line x1="12" y1="20" x2="12.01" y2="20"/>
       </svg>
       Ocorrências & Rompimentos
-      <span class="tab-counter" *ngIf="issuesData()">{{ issuesData()?.items?.length || 0 }}</span>
     </button>
 
     <button
@@ -80,33 +79,20 @@
         <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
       </svg>
       Mural de Comunicados
-      <span class="tab-counter" *ngIf="noticesData()">{{ noticesData()?.items?.length || 0 }}</span>
     </button>
   </div>
 
-  <!-- Barra de Filtros -->
+  <!-- Barra de Filtros Simplificada -->
   <div class="filters-card no-print">
-    <div class="filter-presets">
-      <span class="filter-label">Período:</span>
-      <button class="preset-btn" [class.active]="periodPreset() === 'today'" (click)="applyPreset('today')">Hoje</button>
-      <button class="preset-btn" [class.active]="periodPreset() === '7days'" (click)="applyPreset('7days')">7 dias</button>
-      <button class="preset-btn" [class.active]="periodPreset() === '30days'" (click)="applyPreset('30days')">30 dias</button>
-      <button class="preset-btn" [class.active]="periodPreset() === 'month'" (click)="applyPreset('month')">Mês Atual</button>
-      <button class="preset-btn" [class.active]="periodPreset() === 'all'" (click)="applyPreset('all')">Todo o Histórico</button>
-      <button class="preset-btn" [class.active]="periodPreset() === 'custom'" (click)="periodPreset.set('custom')">Personalizado</button>
-    </div>
-
     <div class="filter-controls">
-      <!-- Datas Personalizadas -->
-      <div class="date-range-group" *ngIf="periodPreset() === 'custom' || startDate() || endDate()">
-        <div class="control-group">
-          <label>De:</label>
-          <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event); periodPreset.set('custom')" />
-        </div>
-        <div class="control-group">
-          <label>Até:</label>
-          <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event); periodPreset.set('custom')" />
-        </div>
+      <!-- Datas Personalizadas (Padrão Direto) -->
+      <div class="control-group">
+        <label>Data Início:</label>
+        <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event)" />
+      </div>
+      <div class="control-group">
+        <label>Data Fim:</label>
+        <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event)" />
       </div>
 
       <!-- Filtros de Ocorrências -->
@@ -217,7 +203,7 @@
         <div class="kpi-info">
           <span class="kpi-label">Total de Ocorrências</span>
           <span class="kpi-value">{{ stats.total }}</span>
-          <span class="kpi-sub">registros no período</span>
+          <span class="kpi-sub">Registros no Período</span>
         </div>
       </div>
 
@@ -231,7 +217,7 @@
         <div class="kpi-info">
           <span class="kpi-label">Resolvidas</span>
           <span class="kpi-value value-green">{{ stats.resolved }}</span>
-          <span class="kpi-sub">{{ stats.resolutionRate }}% taxa de resolução</span>
+          <span class="kpi-sub">{{ stats.resolutionRate }}% Taxa de Resolução</span>
         </div>
       </div>
 
@@ -246,7 +232,7 @@
         <div class="kpi-info">
           <span class="kpi-label">Em Aberto</span>
           <span class="kpi-value value-red">{{ stats.ongoing }}</span>
-          <span class="kpi-sub">necessitam atenção</span>
+          <span class="kpi-sub">Necessitam de Atenção</span>
         </div>
       </div>
 
@@ -321,13 +307,11 @@
 
             <tr *ngIf="!isLoading() && (!issuesData()?.items || issuesData()?.items?.length === 0)">
               <td colspan="7" class="empty-cell">
-                <div class="empty-state">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="8" y1="12" x2="16" y2="12"/>
-                  </svg>
-                  <p>Nenhuma ocorrência encontrada para o período e filtros selecionados.</p>
-                </div>
+                <app-empty-state
+                  icon="issues"
+                  title="Nenhuma ocorrência encontrada"
+                  message="Nenhuma ocorrência encontrada para o período e filtros selecionados."
+                ></app-empty-state>
               </td>
             </tr>
 
@@ -361,7 +345,7 @@
         <div class="kpi-info">
           <span class="kpi-label">Comunicados Emitidos</span>
           <span class="kpi-value">{{ stats.totalNotices }}</span>
-          <span class="kpi-sub">no período selecionado</span>
+          <span class="kpi-sub">No Período Selecionado</span>
         </div>
       </div>
 
@@ -377,7 +361,7 @@
         <div class="kpi-info">
           <span class="kpi-label">Colaboradores Ativos</span>
           <span class="kpi-value">{{ stats.totalActiveUsers }}</span>
-          <span class="kpi-sub">base para leitura</span>
+          <span class="kpi-sub">Base para Leitura</span>
         </div>
       </div>
 
@@ -394,7 +378,7 @@
         <div class="kpi-info">
           <span class="kpi-label">Média de Leitura</span>
           <span class="kpi-value value-green">{{ stats.avgReadPercentage }}%</span>
-          <span class="kpi-sub">engajamento da equipe</span>
+          <span class="kpi-sub">Engajamento da Equipe</span>
         </div>
       </div>
 
@@ -407,7 +391,7 @@
         <div class="kpi-info">
           <span class="kpi-label">Leituras Confirmadas</span>
           <span class="kpi-value">{{ stats.totalReads }}</span>
-          <span class="kpi-sub">confirmações registradas</span>
+          <span class="kpi-sub">Confirmações Registradas</span>
         </div>
       </div>
     </div>
@@ -477,13 +461,11 @@
 
             <tr *ngIf="!isLoading() && (!noticesData()?.items || noticesData()?.items?.length === 0)">
               <td [attr.colspan]="canViewMetrics() ? 6 : 5" class="empty-cell">
-                <div class="empty-state">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="8" y1="12" x2="16" y2="12"/>
-                  </svg>
-                  <p>Nenhum comunicado encontrado para o período e filtros selecionados.</p>
-                </div>
+                <app-empty-state
+                  icon="notices"
+                  title="Nenhum comunicado encontrado"
+                  message="Nenhum comunicado encontrado para o período e filtros selecionados."
+                ></app-empty-state>
               </td>
             </tr>
 

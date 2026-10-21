@@ -5,11 +5,12 @@ import { IssuesService, IssueItem } from '../../core/services/issues';
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
 import { ConfirmService } from '../../core/services/confirm';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-issues',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   templateUrl: './issues.html',
   styleUrls: ['./issues.scss'],
 })

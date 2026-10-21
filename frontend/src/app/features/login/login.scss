@@ -1,14 +1,4 @@
-$purple-primary: #5c1bc4;
-$purple-light: #7c3aed;
-$purple-deep: #311068;
-$dark-bg: #13171f;
-$input-bg: rgba(37, 45, 61, 0.7);
-$input-focus: #283347;
-$text-light: #ffffff;
-$text-muted: #94a3b8;
-
-$font-title: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-$font-body: 'Cambria', 'Georgia', serif;
+@use '../../../styles/_tokens' as *;
 
 .login-wrapper {
   display: flex;
@@ -20,7 +10,7 @@ $font-body: 'Cambria', 'Georgia', serif;
 
   .branding-panel {
     flex: 1.1;
-    background: linear-gradient(135deg, $purple-light 0%, $purple-primary 55%, $purple-deep 100%);
+    background: $bg-sidebar;
     padding: 4.5rem;
     display: flex;
     flex-direction: column;
@@ -28,30 +18,6 @@ $font-body: 'Cambria', 'Georgia', serif;
     color: $text-light;
     position: relative;
     overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: -15%;
-      right: -15%;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 65%);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -20%;
-      left: -10%;
-      width: 350px;
-      height: 350px;
-      background: radial-gradient(circle, rgba(0, 0, 0, 0.25) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
-    }
 
     .brand-header {
       position: relative;
@@ -63,7 +29,6 @@ $font-body: 'Cambria', 'Georgia', serif;
         font-weight: 800;
         letter-spacing: 0.18em;
         margin-bottom: 0.85rem;
-        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       }
 
       .brand-subtitle {
@@ -95,8 +60,7 @@ $font-body: 'Cambria', 'Georgia', serif;
         .icon {
           font-family: $font-title;
           font-size: 1.1rem;
-          color: rgba(255, 255, 255, 0.9);
-          filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+          color: $accent;
         }
       }
     }
@@ -116,7 +80,8 @@ $font-body: 'Cambria', 'Georgia', serif;
     align-items: center;
     justify-content: center;
     padding: 3rem;
-    background: radial-gradient(circle at 80% 20%, #1f2736 0%, $dark-bg 100%);
+    background: $dark-bg;
+    border-left: 1px solid $border-subtle;
     position: relative;
 
     .form-content {
@@ -178,7 +143,7 @@ $font-body: 'Cambria', 'Georgia', serif;
             input {
               width: 100%;
               background-color: $input-bg;
-              border: 1px solid rgba(255, 255, 255, 0.08);
+              border: 1px solid $border-strong;
               border-radius: 12px;
               padding: 0.95rem 3rem 0.95rem 3rem;
               color: $text-light;
@@ -189,13 +154,13 @@ $font-body: 'Cambria', 'Georgia', serif;
               transition: all 0.25s ease;
 
               &:focus {
-                border-color: $purple-light;
+                border-color: $accent;
                 background-color: $input-focus;
-                box-shadow: 0 0 16px rgba(124, 58, 237, 0.3);
+                box-shadow: 0 0 0 3px rgba($accent, 0.18);
               }
 
               &::placeholder {
-                color: #64748b;
+                color: $text-dim;
                 font-family: $font-body;
               }
             }
@@ -221,7 +186,7 @@ $font-body: 'Cambria', 'Georgia', serif;
 
         .submit-btn {
           margin-top: 1rem;
-          background: linear-gradient(135deg, $purple-light 0%, $purple-primary 100%);
+          background: $accent;
           color: $text-light;
           border: none;
           padding: 1rem;
@@ -231,13 +196,13 @@ $font-body: 'Cambria', 'Georgia', serif;
           font-weight: 600;
           letter-spacing: 0.05em;
           cursor: pointer;
-          box-shadow: 0 6px 20px rgba(108, 43, 217, 0.35);
+          box-shadow: 0 6px 20px rgba($accent, 0.22);
           transition: all 0.25s ease;
 
           &:hover:not(:disabled) {
             transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
-            filter: brightness(1.08);
+            box-shadow: 0 8px 24px rgba($accent, 0.32);
+            background: $accent-light;
           }
 
           &:active:not(:disabled) {

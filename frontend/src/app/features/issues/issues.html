@@ -1,7 +1,7 @@
-﻿<div class="issues-page">
+<div class="issues-page">
   <section class="page-title-bar">
     <div class="title-left">
-      <h2>Registro de Problemas Gerais</h2>
+      <h2>REGISTRO DE PROBLEMAS GERAIS</h2>
       <p>Histórico detalhado de ocorrências e manutenções</p>
     </div>
 
@@ -43,8 +43,12 @@
   </section>
 
   <section class="issues-list">
-    <div *ngIf="filteredIssues().length === 0" class="empty-state">
-      <p>Nenhuma ocorrência encontrada para o filtro selecionado.</p>
+    <div *ngIf="filteredIssues().length === 0" class="empty-state-wrapper">
+      <app-empty-state
+        icon="issues"
+        title="Nenhuma Ocorrência Encontrada"
+        message="Não há registros de problemas para o filtro selecionado no momento."
+      ></app-empty-state>
     </div>
 
     <article

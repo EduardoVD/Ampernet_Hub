@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth';
 import { NoticesService } from '../../core/services/notices';
 import { IssuesService, IssueItem } from '../../core/services/issues';
 import { ResponsibilitiesService, ResponsibilityItem } from '../../core/services/responsibilities';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
 
 export interface NoticeItem {
   id: string;
@@ -25,7 +26,7 @@ export interface ModalDetail {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })

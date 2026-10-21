@@ -5,11 +5,12 @@ import { ResponsibilitiesService, ResponsibilityItem } from '../../core/services
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
 import { ConfirmService } from '../../core/services/confirm';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-matrix',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   templateUrl: './matrix.html',
   styleUrls: ['./matrix.scss'],
 })

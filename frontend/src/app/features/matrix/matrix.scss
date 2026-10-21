@@ -1,11 +1,4 @@
-$purple-primary: #5c1bc4;
-$purple-light: #7c3aed;
-$dark-bg: #141822;
-$card-bg: #1c2230;
-$text-light: #ffffff;
-$text-muted: #94a3b8;
-$font-title: 'Plus Jakarta Sans', system-ui, sans-serif;
-$font-body: 'Cambria', 'Georgia', serif;
+@use '../../../styles/_tokens' as *;
 
 :host {
   display: flex;
@@ -25,25 +18,8 @@ $font-body: 'Cambria', 'Georgia', serif;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-right: 0.5rem;
   padding-bottom: 2.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: rgba($purple-light, 0.4) transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 4px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba($purple-light, 0.35);
-    border-radius: 4px;
-    &:hover {
-      background: $purple-light;
-    }
-  }
+  @include hide-scrollbar;
 
   .page-title-bar {
     display: flex;
@@ -51,12 +27,13 @@ $font-body: 'Cambria', 'Georgia', serif;
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0;
+    flex-shrink: 0;
 
     .title-left {
       h2 {
         font-family: $font-title;
-        font-size: 1.45rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color: $text-light;
         margin: 0;
@@ -68,46 +45,30 @@ $font-body: 'Cambria', 'Georgia', serif;
         font-size: 0.88rem;
         color: $text-muted;
         margin: 0.25rem 0 0 0;
+        font-style: normal;
       }
     }
 
-    .btn-new-resp {
+    .title-right {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      background: linear-gradient(135deg, $purple-primary, $purple-light);
-      color: #ffffff;
-      border: none;
-      padding: 0.6rem 1.25rem;
-      border-radius: 10px;
-      font-family: $font-title;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 14px rgba($purple-primary, 0.35);
+      gap: 1rem;
+      flex-wrap: wrap;
 
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba($purple-primary, 0.5);
-        filter: brightness(1.1);
-      }
-
-      &:active {
-        transform: translateY(0);
+      .btn-new-resp {
+        @include btn-primary;
+        padding: 0.6rem 1.25rem;
       }
     }
   }
 
   .filters-card {
-    background: $card-bg;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
+    @include surface-card($radius-lg);
     padding: 1rem 1.25rem;
     display: flex;
-    gap: 1.25rem;
+    gap: 1.15rem;
     flex-wrap: wrap;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
 
     .filter-group {
       display: flex;
@@ -121,62 +82,36 @@ $font-body: 'Cambria', 'Georgia', serif;
       }
 
       label {
-        font-family: $font-title;
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: $text-muted;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+        @include eyebrow;
       }
 
       input {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 8px;
+        @include input-field;
         padding: 0.55rem 0.85rem;
-        color: $text-light;
-        font-family: $font-title;
         font-size: 0.88rem;
-        outline: none;
-        transition: all 0.2s ease;
-
-        &:focus {
-          border-color: $purple-light;
-          box-shadow: 0 0 0 2px rgba($purple-light, 0.2);
-          background: rgba(255, 255, 255, 0.06);
-        }
-
-        &::placeholder {
-          color: rgba(255, 255, 255, 0.3);
-        }
       }
     }
   }
 
-  .table-container {
+  .empty-state-wrapper {
     background: $card-bg;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .table-container {
+    @include surface-card($radius-lg);
     overflow: hidden;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 
     .table-scroll {
       overflow-x: auto;
       max-height: 600px;
-      scrollbar-width: thin;
-      scrollbar-color: rgba($purple-light, 0.4) transparent;
-
-      &::-webkit-scrollbar {
-        height: 6px;
-        width: 6px;
-      }
-      &::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.02);
-      }
-      &::-webkit-scrollbar-thumb {
-        background: rgba($purple-light, 0.35);
-        border-radius: 4px;
-      }
+      @include hide-scrollbar;
     }
 
     .matrix-table {
@@ -228,9 +163,9 @@ $font-body: 'Cambria', 'Georgia', serif;
               border-radius: 6px;
               font-size: 0.78rem;
               font-weight: 700;
-              background: rgba($purple-light, 0.12);
-              border: 1px solid rgba($purple-light, 0.3);
-              color: #c4b5fd;
+              background: rgba($accent, 0.12);
+              border: 1px solid rgba($accent, 0.3);
+              color: $accent-light;
             }
 
             &.city-col {
@@ -240,24 +175,25 @@ $font-body: 'Cambria', 'Georgia', serif;
               font-weight: 600;
 
               .pin-icon {
-                color: #f43f5e;
+                color: $accent;
               }
             }
 
             &.resp-col {
               .avatar {
-                width: 28px;
-                height: 28px;
+                width: 32px;
+                height: 32px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, $purple-primary, #9333ea);
+                background: $accent;
                 color: #ffffff;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 0.8rem;
+                font-size: 0.85rem;
                 font-weight: 700;
-                margin-right: 0.65rem;
+                margin-right: 0.75rem;
                 vertical-align: middle;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
               }
 
               .resp-name {
@@ -272,15 +208,15 @@ $font-body: 'Cambria', 'Georgia', serif;
               gap: 0.35rem;
               padding: 0.2rem 0.55rem;
               border-radius: 6px;
-              background: rgba(16, 185, 129, 0.12);
-              border: 1px solid rgba(16, 185, 129, 0.25);
-              color: #34d399;
+              background: rgba($success, 0.12);
+              border: 1px solid rgba($success, 0.25);
+              color: $success;
               font-size: 0.82rem;
               font-weight: 600;
             }
 
             .email-link {
-              color: #38bdf8;
+              color: $info;
               text-decoration: none;
               font-size: 0.85rem;
               display: inline-flex;
@@ -289,7 +225,7 @@ $font-body: 'Cambria', 'Georgia', serif;
               transition: color 0.15s ease;
 
               &:hover {
-                color: #7dd3fc;
+                color: $info;
                 text-decoration: underline;
               }
             }
@@ -306,34 +242,34 @@ $font-body: 'Cambria', 'Georgia', serif;
               .btn-action {
                 background: transparent;
                 border: none;
-                padding: 0.4rem;
-                border-radius: 6px;
+                padding: 0.45rem;
+                border-radius: 8px;
                 cursor: pointer;
-                margin-left: 0.35rem;
+                margin-left: 0.4rem;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 transition: all 0.2s ease;
 
                 &.edit {
-                  background: rgba(59, 130, 246, 0.12);
-                  border: 1px solid rgba(59, 130, 246, 0.25);
-                  color: #60a5fa;
+                  background: rgba($neutral-strong, 0.12);
+                  border: 1px solid rgba($neutral-strong, 0.25);
+                  color: $info;
 
                   &:hover {
-                    background: #3b82f6;
+                    background: $neutral-strong;
                     color: #ffffff;
                     transform: scale(1.05);
                   }
                 }
 
                 &.delete {
-                  background: rgba(239, 68, 68, 0.12);
-                  border: 1px solid rgba(239, 68, 68, 0.25);
-                  color: #ef4444;
+                  background: rgba($accent, 0.12);
+                  border: 1px solid rgba($accent, 0.25);
+                  color: $accent;
 
                   &:hover {
-                    background: #ef4444;
+                    background: $accent;
                     color: #ffffff;
                     transform: scale(1.05);
                   }
@@ -342,11 +278,9 @@ $font-body: 'Cambria', 'Georgia', serif;
             }
           }
 
-          .empty-table-state {
-            padding: 3rem;
+          .empty-cell {
+            padding: 3.5rem 1.5rem !important;
             text-align: center;
-            color: $text-muted;
-            font-size: 0.95rem;
           }
         }
       }
@@ -365,7 +299,7 @@ $font-body: 'Cambria', 'Georgia', serif;
     padding: 1.5rem;
 
     .modal-card {
-      background: #181d28;
+      background: $card-bg;
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
       border-radius: 16px;
@@ -440,24 +374,11 @@ $font-body: 'Cambria', 'Georgia', serif;
           }
 
           input, select {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            @include input-field;
             padding: 0.7rem 0.9rem;
-            color: $text-light;
-            font-family: $font-title;
-            font-size: 0.9rem;
-            outline: none;
-            transition: all 0.2s ease;
-
-            &:focus {
-              border-color: $purple-light;
-              box-shadow: 0 0 0 2px rgba($purple-light, 0.2);
-              background: rgba(255, 255, 255, 0.06);
-            }
 
             option {
-              background: #181d28;
+              background: $card-bg;
               color: $text-light;
             }
           }
@@ -471,44 +392,13 @@ $font-body: 'Cambria', 'Georgia', serif;
           border-top: 1px solid rgba(255, 255, 255, 0.06);
 
           .btn-cancel {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: $text-muted;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-family: $font-title;
-            font-weight: 600;
-            font-size: 0.88rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-
-            &:hover {
-              color: $text-light;
-              background: rgba(255, 255, 255, 0.04);
-            }
+            @include btn-secondary;
+            padding: 0.6rem 1.25rem;
           }
 
           .btn-submit {
-            background: linear-gradient(135deg, $purple-primary, $purple-light);
-            border: none;
-            color: #ffffff;
+            @include btn-primary;
             padding: 0.6rem 1.4rem;
-            border-radius: 8px;
-            font-family: $font-title;
-            font-weight: 600;
-            font-size: 0.88rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-
-            &:hover {
-              filter: brightness(1.15);
-              box-shadow: 0 4px 12px rgba($purple-primary, 0.4);
-            }
-
-            &:disabled {
-              opacity: 0.5;
-              cursor: not-allowed;
-            }
           }
         }
       }

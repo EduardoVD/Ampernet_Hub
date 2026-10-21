@@ -1,12 +1,4 @@
-$purple-primary: #5c1bc4;
-$purple-light: #7c3aed;
-$dark-bg: #141822;
-$card-bg: #1c2230;
-$input-bg: #283144;
-$text-light: #ffffff;
-$text-muted: #94a3b8;
-$font-title: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-$font-body: 'Cambria', 'Georgia', serif;
+@use '../../../styles/_tokens' as *;
 
 @mixin hide-scrollbar {
   scrollbar-width: none;
@@ -42,23 +34,26 @@ $font-body: 'Cambria', 'Georgia', serif;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.85rem;
+  gap: 1rem;
+  padding: 0.25rem 0;
   flex-shrink: 0;
 
   .title-left {
     h2 {
       font-family: $font-title;
-      font-size: 1.35rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: $text-light;
-      margin: 0 0 0.25rem 0;
+      margin: 0;
+      letter-spacing: -0.01em;
     }
 
     p {
-      font-family: $font-body;
-      font-size: 0.95rem;
+      font-family: $font-title;
+      font-size: 0.88rem;
       color: $text-muted;
-      margin: 0;
+      margin: 0.25rem 0 0 0;
+      font-style: normal;
     }
   }
 
@@ -86,11 +81,11 @@ $font-body: 'Cambria', 'Georgia', serif;
         }
 
         &.active strong {
-          color: #22c55e;
+          color: $success;
         }
 
         &.admin strong {
-          color: #a78bfa;
+          color: $accent-light;
         }
       }
 
@@ -100,32 +95,14 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
 
     .btn-new-user {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: linear-gradient(135deg, $purple-primary 0%, $purple-light 100%);
-      color: $text-light;
-      border: none;
+      @include btn-primary;
       padding: 0.6rem 1.15rem;
-      border-radius: 8px;
-      font-family: $font-title;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba($purple-primary, 0.35);
-
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba($purple-light, 0.45);
-      }
     }
   }
 }
 
 .filters-card {
-  background-color: $card-bg;
-  border-radius: 12px;
+  @include surface-card($radius-lg);
   padding: 1rem 1.25rem;
   display: flex;
   gap: 1.15rem;
@@ -143,9 +120,7 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
 
     label {
-      font-family: $font-body;
-      font-size: 0.85rem;
-      color: $text-muted;
+      @include eyebrow;
     }
 
     .input-with-icon {
@@ -167,37 +142,26 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
 
     input, select {
-      background-color: $input-bg;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
+      @include input-field;
       padding: 0.55rem 0.85rem;
-      color: $text-light;
-      font-family: $font-body;
-      font-size: 0.95rem;
-      outline: none;
+      font-size: 0.9rem;
       box-sizing: border-box;
-      transition: border-color 0.2s;
-
-      &:focus {
-        border-color: $purple-light;
-      }
-    }
-
-    select {
-      cursor: pointer;
-      min-width: 170px;
 
       option {
         background-color: $card-bg;
         color: $text-light;
       }
     }
+
+    select {
+      cursor: pointer;
+      min-width: 170px;
+    }
   }
 }
 
 .table-container {
-  background-color: $card-bg;
-  border-radius: 12px;
+  @include surface-card($radius-lg);
   flex: 1;
   min-height: 0;
   display: flex;
@@ -218,8 +182,8 @@ $font-body: 'Cambria', 'Georgia', serif;
       thead th {
         position: sticky;
         top: 0;
-        background-color: #221a36;
-        color: $purple-light;
+        background-color: $bg-sidebar;
+        color: $accent;
         font-family: $font-title;
         font-size: 0.78rem;
         font-weight: 700;
@@ -262,7 +226,7 @@ $font-body: 'Cambria', 'Georgia', serif;
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba($purple-primary, 0.6) 0%, rgba($purple-light, 0.8) 100%);
+            background: $accent-strong;
             color: $text-light;
             font-family: $font-title;
             font-weight: 700;
@@ -274,8 +238,8 @@ $font-body: 'Cambria', 'Georgia', serif;
             border: 1px solid rgba(255, 255, 255, 0.15);
 
             &.admin-avatar {
-              background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-              box-shadow: 0 0 10px rgba(124, 58, 237, 0.35);
+              background: $accent;
+              box-shadow: 0 0 10px rgba($accent, 0.35);
             }
           }
 
@@ -295,7 +259,7 @@ $font-body: 'Cambria', 'Georgia', serif;
 
               .you-badge {
                 font-size: 0.72rem;
-                color: #a78bfa;
+                color: $accent-light;
                 font-weight: 500;
               }
             }
@@ -317,20 +281,20 @@ $font-body: 'Cambria', 'Georgia', serif;
           letter-spacing: 0.03em;
 
           &.admin {
-            background: rgba(124, 58, 237, 0.2);
-            color: #c4b5fd;
-            border: 1px solid rgba(124, 58, 237, 0.4);
+            background: rgba($accent, 0.2);
+            color: $accent-light;
+            border: 1px solid rgba($accent, 0.4);
           }
 
           &.supervisor {
-            background: rgba(14, 165, 233, 0.18);
-            color: #7dd3fc;
-            border: 1px solid rgba(14, 165, 233, 0.35);
+            background: rgba($info, 0.18);
+            color: $info;
+            border: 1px solid rgba($info, 0.35);
           }
 
           &.user {
             background: rgba(255, 255, 255, 0.08);
-            color: #cbd5e1;
+            color: $text-soft;
             border: 1px solid rgba(255, 255, 255, 0.12);
           }
         }
@@ -355,23 +319,23 @@ $font-body: 'Cambria', 'Georgia', serif;
           }
 
           &.active {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: rgba($success, 0.15);
+            color: $success;
+            border: 1px solid rgba($success, 0.3);
 
             .status-dot {
-              background-color: #22c55e;
-              box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+              background-color: $success;
+              box-shadow: 0 0 6px rgba($success, 0.6);
             }
           }
 
           &.inactive {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba($accent, 0.15);
+            color: $accent-light;
+            border: 1px solid rgba($accent, 0.3);
 
             .status-dot {
-              background-color: #ef4444;
+              background-color: $accent;
             }
           }
 
@@ -414,18 +378,18 @@ $font-body: 'Cambria', 'Georgia', serif;
             }
 
             &.edit:hover {
-              color: #a78bfa;
-              border-color: $purple-light;
+              color: $accent-light;
+              border-color: $accent;
             }
 
             &.key:hover {
-              color: #38bdf8;
-              border-color: #0ea5e9;
+              color: $info;
+              border-color: $neutral-strong;
             }
 
             &.delete:hover:not(:disabled) {
-              color: #f87171;
-              border-color: #ef4444;
+              color: $accent-light;
+              border-color: $accent;
             }
 
             &:disabled {
@@ -436,11 +400,9 @@ $font-body: 'Cambria', 'Georgia', serif;
         }
       }
 
-      .empty-table-state {
+      .empty-cell {
         text-align: center;
-        color: $text-muted;
-        padding: 3rem 1rem;
-        font-style: italic;
+        padding: 3.5rem 1.5rem !important;
       }
     }
   }
@@ -479,7 +441,7 @@ $font-body: 'Cambria', 'Georgia', serif;
     }
 
     .modal-header {
-      background: linear-gradient(90deg, rgba($purple-primary, 0.5) 0%, rgba($purple-light, 0.25) 100%);
+      background: $bg-sidebar;
       padding: 1.15rem 1.5rem;
       display: flex;
       align-items: center;
@@ -546,29 +508,19 @@ $font-body: 'Cambria', 'Georgia', serif;
         }
 
         input, select {
-          background-color: $input-bg;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 8px;
+          @include input-field;
           padding: 0.6rem 0.85rem;
-          color: $text-light;
-          font-family: $font-body;
-          font-size: 0.95rem;
-          outline: none;
+          font-size: 0.92rem;
           box-sizing: border-box;
-          transition: border-color 0.2s;
-
-          &:focus {
-            border-color: $purple-light;
-          }
-        }
-
-        select {
-          cursor: pointer;
 
           option {
             background-color: $card-bg;
             color: $text-light;
           }
+        }
+
+        select {
+          cursor: pointer;
         }
       }
     }
@@ -581,40 +533,15 @@ $font-body: 'Cambria', 'Georgia', serif;
       gap: 0.75rem;
 
       .btn-cancel {
-        background: rgba(255, 255, 255, 0.06);
-        color: $text-light;
-        border: none;
+        @include btn-secondary;
         padding: 0.55rem 1.1rem;
-        border-radius: 8px;
-        font-family: $font-title;
         font-size: 0.85rem;
-        cursor: pointer;
-
-        &:hover {
-          background: rgba(255, 255, 255, 0.12);
-        }
       }
 
       .btn-submit {
-        background: linear-gradient(135deg, $purple-primary 0%, $purple-light 100%);
-        color: $text-light;
-        border: none;
+        @include btn-primary;
         padding: 0.55rem 1.25rem;
-        border-radius: 8px;
-        font-family: $font-title;
         font-size: 0.85rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:hover:not(:disabled) {
-          box-shadow: 0 4px 14px rgba($purple-light, 0.4);
-        }
-
-        &:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
       }
     }
   }

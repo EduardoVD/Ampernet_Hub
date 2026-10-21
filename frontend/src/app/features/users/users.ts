@@ -5,11 +5,12 @@ import { UsersService, UserItem } from '../../core/services/users';
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
 import { ConfirmService } from '../../core/services/confirm';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   templateUrl: './users.html',
   styleUrls: ['./users.scss']
 })

@@ -5,6 +5,7 @@ import { NoticesService, NoticeReadStatusResponse } from '../../core/services/no
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
 import { ConfirmService } from '../../core/services/confirm';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
 
 export interface NoticeDetail {
   id: string;
@@ -20,7 +21,7 @@ export interface NoticeDetail {
 @Component({
   selector: 'app-notices',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   templateUrl: './notices.html',
   styleUrls: ['./notices.scss']
 })

@@ -1,10 +1,11 @@
 <div class="notices-page">
   <section class="page-title-bar">
-      <div class="title-left">
-        <h2>Recados e Avisos</h2>
-        <p>Comunicados Internos da Equipe</p>
-      </div>
+    <div class="title-left">
+      <h2>RECADOS E AVISOS</h2>
+      <p>Comunicados Internos da Equipe</p>
+    </div>
 
+    <div class="title-right">
       <button *ngIf="canManageNotices()" class="btn-new-notice" (click)="openCreateModal()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -12,11 +13,16 @@
         </svg>
         <span>Novo Aviso</span>
       </button>
-    </section>
+    </div>
+  </section>
 
     <section class="notices-list">
-      <div *ngIf="notices().length === 0" class="empty-state">
-        <p>Nenhum recado de momento.</p>
+      <div *ngIf="notices().length === 0" class="empty-state-wrapper">
+        <app-empty-state
+          icon="notices"
+          title="Nenhum Comunicado Disponível"
+          message="Não há recados ou avisos publicados no mural no momento."
+        ></app-empty-state>
       </div>
 
       <article

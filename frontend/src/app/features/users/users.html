@@ -2,7 +2,7 @@
   <!-- Barra Superior -->
   <section class="page-title-bar">
     <div class="title-left">
-      <h2>Gestão de Colaboradores e Acessos</h2>
+      <h2>GESTÃO DE COlABORADORES E ACESSOS</h2>
       <p>Gerenciamento de contas, perfis de permissão e status de acesso ao sistema</p>
     </div>
 
@@ -176,8 +176,12 @@
           </tr>
 
           <tr *ngIf="filteredUsers().length === 0">
-            <td colspan="5" class="empty-table-state">
-              Nenhum colaborador encontrado para os filtros selecionados.
+            <td colspan="5" class="empty-cell">
+              <app-empty-state
+                icon="users"
+                title="Nenhum colaborador encontrado"
+                message="Nenhum usuário corresponde aos filtros ou busca informados."
+              ></app-empty-state>
             </td>
           </tr>
         </tbody>

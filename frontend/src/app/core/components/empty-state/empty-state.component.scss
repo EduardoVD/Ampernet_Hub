@@ -1,0 +1,95 @@
+@use '../../../../styles/_tokens' as *;
+
+:host {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+
+  .icon-bubble {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: $text-muted;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+
+    svg {
+      color: $text-dim;
+      transition: color 0.2s ease;
+    }
+  }
+
+  .empty-title {
+    font-family: $font-title;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: $text-light;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .empty-message {
+    font-family: $font-title;
+    font-size: 0.88rem;
+    color: $text-muted;
+    margin: 0.35rem 0 0 0;
+    max-width: 460px;
+    line-height: 1.5;
+  }
+
+  .empty-actions {
+    margin-top: 1rem;
+    &:empty {
+      display: none;
+    }
+  }
+
+  // Versão compacta para widgets de Dashboard ou cards menores
+  &.compact {
+    padding: 1.5rem 1rem;
+
+    .icon-bubble {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 0.55rem;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .empty-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .empty-message {
+      font-size: 0.82rem;
+      margin-top: 0.25rem;
+      max-width: 340px;
+    }
+
+    .empty-actions {
+      margin-top: 0.75rem;
+    }
+  }
+}
+
