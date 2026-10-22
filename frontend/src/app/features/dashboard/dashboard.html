@@ -3,28 +3,69 @@
       <header class="section-banner">
         <h2>REGISTRO DE PROBLEMAS GERAIS</h2>
       </header>
-      <div class="section-body issues-scroll">
-        <div *ngIf="issues().length === 0" class="empty-state-dashboard">
-          <app-empty-state
-            icon="issues"
-            title="Nenhum Problema em Aberto"
-            message="Todos os circuitos e serviços operando normalmente."
-            [compact]="true"
-          ></app-empty-state>
-        </div>
-        <div *ngIf="issues().length > 0" class="issues-grid">
-          <div
-            *ngFor="let issue of issues()"
-            class="issue-card"
-            [ngClass]="issue.status"
-            (click)="openIssueModal(issue)"
-            title="Clique para visualizar os detalhes"
-          >
-            <span class="badge">{{ issue.status === 'ongoing' ? 'Problema Ocorrendo' : 'Problema Resolvido' }}</span>
-            <h3>{{ issue.title }}</h3>
-            <p class="card-desc-preview">{{ issue.description }}</p>
+      <div
+        class="issues-wrapper"
+        (mousemove)="onWrapperMouseMove($event)"
+        (mouseleave)="onWrapperMouseLeave()"
+      >
+        <button
+          *ngIf="issues().length > 0"
+          type="button"
+          class="scroll-arrow-btn scroll-arrow-left"
+          [class.is-visible]="(showLeftArrow() || holdingDirection() === 'left') && canScrollLeft()"
+          (mousedown)="onMouseDownArrow('left', $event)"
+          (mouseup)="onMouseUpArrow('left')"
+          (mouseleave)="onMouseLeaveArrow()"
+          (touchstart)="onMouseDownArrow('left', $event)"
+          (touchend)="onMouseUpArrow('left')"
+          title="Rolar para esquerda (clique ou segure)"
+          aria-label="Rolar problemas para esquerda"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div #issuesScroll class="section-body issues-scroll" (scroll)="updateScrollState()">
+          <div *ngIf="issues().length === 0" class="empty-state-dashboard">
+            <app-empty-state
+              icon="issues"
+              title="Nenhum Problema em Aberto"
+              message="Todos os circuitos e serviços operando normalmente."
+              [compact]="true"
+            ></app-empty-state>
+          </div>
+          <div *ngIf="issues().length > 0" class="issues-grid">
+            <div
+              *ngFor="let issue of issues()"
+              class="issue-card"
+              [ngClass]="issue.status"
+              (click)="openIssueModal(issue)"
+              title="Clique para visualizar os detalhes"
+            >
+              <span class="badge">{{ issue.status === 'ongoing' ? 'Problema Ocorrendo' : 'Problema Resolvido' }}</span>
+              <h3>{{ issue.title }}</h3>
+            </div>
           </div>
         </div>
+
+        <button
+          *ngIf="issues().length > 0"
+          type="button"
+          class="scroll-arrow-btn scroll-arrow-right"
+          [class.is-visible]="(showRightArrow() || holdingDirection() === 'right') && canScrollRight()"
+          (mousedown)="onMouseDownArrow('right', $event)"
+          (mouseup)="onMouseUpArrow('right')"
+          (mouseleave)="onMouseLeaveArrow()"
+          (touchstart)="onMouseDownArrow('right', $event)"
+          (touchend)="onMouseUpArrow('right')"
+          title="Rolar para direita (clique ou segure)"
+          aria-label="Rolar problemas para direita"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
       </div>
     </section>
 
@@ -93,6 +134,15 @@
                   placeholder="Filtrar por setor..."
                 />
               </div>
+              <div class="filter-group flex-grow">
+                <label>Buscar:</label>
+                <input
+                  type="text"
+                  [ngModel]="searchFilter()"
+                  (ngModelChange)="searchFilter.set($event)"
+                  placeholder="Digite o nome, ramal ou e-mail..."
+                />
+              </div>
             </div>
 
             <div class="table-scroll-container">
@@ -138,9 +188,6 @@
   <div *ngIf="activeModal()" class="modal-backdrop" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
-        <span *ngIf="activeModal()?.badge" class="modal-badge" [ngClass]="activeModal()?.statusClass">
-          {{ activeModal()?.badge }}
-        </span>
         <h3>{{ activeModal()?.title }}</h3>
         <button class="modal-close-btn" (click)="closeModal()">✕</button>
       </header>

@@ -484,6 +484,13 @@
         cursor: pointer;
         border-radius: 6px;
         transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        svg {
+          flex-shrink: 0;
+        }
 
         &:hover {
           color: $text-light;

@@ -61,7 +61,7 @@
           <span class="badge" [ngClass]="issue.status">
             {{ issue.status === 'ongoing' ? 'Problema Ocorrendo' : 'Problema Resolvido' }}
           </span>
-          <h3 class="issue-title">· {{ issue.title }}</h3>
+          <h3 class="issue-title">{{ issue.title }}</h3>
         </div>
 
         <div class="header-actions" *ngIf="canManage()">

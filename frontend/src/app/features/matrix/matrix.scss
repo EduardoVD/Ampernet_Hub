@@ -117,34 +117,41 @@
     .matrix-table {
       width: 100%;
       border-collapse: collapse;
-      text-align: left;
-      font-family: $font-title;
+      font-family: $font-body;
 
       thead {
-        background: rgba(255, 255, 255, 0.03);
         position: sticky;
         top: 0;
         z-index: 2;
 
         th {
-          padding: 0.9rem 1.25rem;
-          font-size: 0.75rem;
+          background-color: $bg-sidebar;
+          color: $accent;
+          font-family: $font-title;
+          font-size: 0.8rem;
           font-weight: 700;
-          color: $text-muted;
+          text-align: center;
+          padding: 0.85rem 1rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
+          &:first-child {
+            padding-left: 1.25rem;
+          }
+          &:last-child {
+            padding-right: 1.25rem;
+          }
+
           &.th-actions {
-            text-align: right;
-            padding-right: 1.5rem;
+            text-align: center;
           }
         }
       }
 
       tbody {
         tr {
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           transition: background 0.15s ease;
 
           &:hover {
@@ -152,91 +159,45 @@
           }
 
           td {
-            padding: 1rem 1.25rem;
-            font-size: 0.9rem;
+            padding: 0.85rem 1rem;
+            font-family: $font-body;
+            font-size: 0.95rem;
             color: $text-light;
+            text-align: center;
             vertical-align: middle;
 
-            .sector-badge {
-              display: inline-block;
-              padding: 0.25rem 0.65rem;
-              border-radius: 6px;
-              font-size: 0.78rem;
-              font-weight: 700;
-              background: rgba($accent, 0.12);
-              border: 1px solid rgba($accent, 0.3);
+            &:first-child {
+              padding-left: 1.25rem;
+            }
+            &:last-child {
+              padding-right: 1.25rem;
+            }
+
+            .sector-tag {
+              background: rgba($accent, 0.15);
               color: $accent-light;
-            }
-
-            &.city-col {
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
+              border: 1px solid rgba($accent, 0.3);
+              padding: 0.2rem 0.5rem;
+              border-radius: 4px;
+              font-size: 0.75rem;
+              font-family: $font-title;
               font-weight: 600;
-
-              .pin-icon {
-                color: $accent;
-              }
-            }
-
-            &.resp-col {
-              .avatar {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                background: $accent;
-                color: #ffffff;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.85rem;
-                font-weight: 700;
-                margin-right: 0.75rem;
-                vertical-align: middle;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-              }
-
-              .resp-name {
-                font-weight: 600;
-                vertical-align: middle;
-              }
-            }
-
-            .ramal-tag {
-              display: inline-flex;
-              align-items: center;
-              gap: 0.35rem;
-              padding: 0.2rem 0.55rem;
-              border-radius: 6px;
-              background: rgba($success, 0.12);
-              border: 1px solid rgba($success, 0.25);
-              color: $success;
-              font-size: 0.82rem;
-              font-weight: 600;
+              display: inline-block;
             }
 
             .email-link {
-              color: $info;
+              color: $accent-light;
               text-decoration: none;
-              font-size: 0.85rem;
-              display: inline-flex;
-              align-items: center;
-              gap: 0.35rem;
-              transition: color 0.15s ease;
+              transition: color 0.2s;
 
               &:hover {
-                color: $info;
+                color: $accent-light;
                 text-decoration: underline;
               }
             }
 
-            .empty-text {
-              color: rgba(255, 255, 255, 0.25);
-            }
-
             &.td-actions {
-              text-align: right;
-              padding-right: 1.5rem;
+              text-align: center;
               white-space: nowrap;
 
               .btn-action {
@@ -245,7 +206,7 @@
                 padding: 0.45rem;
                 border-radius: 8px;
                 cursor: pointer;
-                margin-left: 0.4rem;
+                margin: 0 0.25rem;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -277,11 +238,11 @@
               }
             }
           }
+        }
 
-          .empty-cell {
-            padding: 3.5rem 1.5rem !important;
-            text-align: center;
-          }
+        .empty-cell {
+          padding: 3.5rem 1.5rem !important;
+          text-align: center;
         }
       }
     }

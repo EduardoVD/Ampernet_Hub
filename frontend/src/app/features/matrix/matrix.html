@@ -77,30 +77,16 @@
         <tbody>
           <tr *ngFor="let item of filteredResponsibilities()">
             <td>
-              <span class="sector-badge">{{ item.sector }}</span>
+              <span class="sector-tag">{{ item.sector }}</span>
             </td>
-            <td class="city-col">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pin-icon">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-              <span>{{ item.city }}</span>
-            </td>
-            <td class="resp-col">
-              <div class="avatar">{{ (item.responsible || 'R').charAt(0).toUpperCase() }}</div>
-              <span class="resp-name">{{ item.responsible }}</span>
-            </td>
-            <td>
-              <span *ngIf="item.ramal" class="ramal-tag">
-                📞 {{ item.ramal }}
-              </span>
-              <span *ngIf="!item.ramal" class="empty-text">—</span>
-            </td>
+            <td>{{ item.city }}</td>
+            <td>{{ item.responsible }}</td>
+            <td>{{ item.ramal || '—' }}</td>
             <td>
               <a *ngIf="item.email" [href]="'mailto:' + item.email" class="email-link">
-                ✉️ {{ item.email }}
+                {{ item.email }}
               </a>
-              <span *ngIf="!item.email" class="empty-text">—</span>
+              <span *ngIf="!item.email">—</span>
             </td>
             <td *ngIf="canManage()" class="td-actions">
               <button
