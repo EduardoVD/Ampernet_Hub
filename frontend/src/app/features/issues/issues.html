@@ -32,6 +32,16 @@
           Resolvidos
         </button>
       </div>
+
+      <a routerLink="/relatorios" [queryParams]="{ tab: 'issues' }" class="btn-history" title="Visualizar histórico e relatórios de ocorrências">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M12 7v5l4 2"/>
+        </svg>
+        <span>Histórico</span>
+      </a>
+
       <button *ngIf="canManage()" class="btn-new-issue" (click)="openCreateModal()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -156,7 +166,6 @@
     <div class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
         <h3>{{ editingIssueId() ? 'Editar Ocorrência' : 'Novo Registro de Problema' }}</h3>
-        <button class="modal-close-btn" (click)="closeModal()">✕</button>
       </header>
 
       <form (ngSubmit)="submitIssue()" class="modal-form">

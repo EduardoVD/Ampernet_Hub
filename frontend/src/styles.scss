@@ -67,4 +67,61 @@ table,
   }
 }
 
+/* ======================================================== */
+/* ESTILOS GLOBAIS DE IMPRESSÃO (PDF / EXPORTAÇÃO) */
+/* ======================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Oculta rigorosamente a barra lateral, topo e qualquer elemento fora do relatório */
+  .sidebar,
+  aside.sidebar,
+  .top-header,
+  header.top-header,
+  .no-print,
+  app-toast-container,
+  app-confirm-modal {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #111827 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-scheme: light !important;
+  }
+
+  .app-layout,
+  .main-wrapper,
+  .content-area,
+  .page-content-area {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  .reports-container {
+    padding: 12mm 14mm !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
 

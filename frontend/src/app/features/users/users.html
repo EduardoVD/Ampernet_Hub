@@ -194,7 +194,6 @@
     <div class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
         <h3>{{ editingUserId() ? 'Editar Colaborador' : 'Novo Colaborador' }}</h3>
-        <button class="modal-close-btn" (click)="closeModal()">✕</button>
       </header>
 
       <form (ngSubmit)="submitForm()" class="modal-form">
@@ -283,7 +282,6 @@
     <div class="modal-card mini-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
         <h3>Redefinir Senha</h3>
-        <button class="modal-close-btn" (click)="closePasswordModal()">✕</button>
       </header>
 
       <div class="modal-body-mini">

@@ -22,20 +22,9 @@ export class ReportsService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  private parseDateBoundary(dateStr: string, isEnd = false): Date {
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      const y = parseInt(parts[0], 10);
-      const m = parseInt(parts[1], 10) - 1;
-      const d = parseInt(parts[2], 10);
-      return isEnd
-        ? new Date(y, m, d, 23, 59, 59, 999)
-        : new Date(y, m, d, 0, 0, 0, 0);
-    }
-    const dt = new Date(dateStr);
-    if (isEnd) dt.setHours(23, 59, 59, 999);
-    else dt.setHours(0, 0, 0, 0);
-    return dt;
+  private formatDateBoundary(dateStr: string, isEnd = false): string {
+    const cleanDate = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.trim();
+    return isEnd ? `${cleanDate} 23:59:59` : `${cleanDate} 00:00:00`;
   }
 
   async getIssuesReport(query: IssuesReportQueryDto, isPrivileged = false) {
@@ -47,14 +36,14 @@ export class ReportsService {
       qb.withDeleted();
     }
 
-    // Tratamento de fuso horário local: decompõe ano/mês/dia para evitar salto de UTC
+    // Tratamento de fuso de banco: aplica limite exato de início e fim no dia
     if (query.startDate) {
-      const start = this.parseDateBoundary(query.startDate, false);
+      const start = this.formatDateBoundary(query.startDate, false);
       qb.andWhere('issue.startedAt >= :start', { start });
     }
 
     if (query.endDate) {
-      const end = this.parseDateBoundary(query.endDate, true);
+      const end = this.formatDateBoundary(query.endDate, true);
       qb.andWhere('issue.startedAt <= :end', { end });
     }
 
@@ -105,9 +94,10 @@ export class ReportsService {
       } else {
         ongoingCount++;
         const diffMs = Math.max(0, Date.now() - started.getTime());
-        const mins = Math.floor(diffMs / 60000);
-        const hours = Math.floor(mins / 60);
-        durationFormatted = hours > 0 ? `${hours}h ${mins}min (decorrido)` : `${mins}min (decorrido)`;
+        const totalMins = Math.floor(diffMs / 60000);
+        const hours = Math.floor(totalMins / 60);
+        const mins = totalMins % 60;
+        durationFormatted = hours > 0 ? `${hours}h ${mins}min (Decorrido)` : `${mins}min (Decorrido)`;
       }
 
       return {
@@ -168,14 +158,14 @@ export class ReportsService {
       qb.withDeleted();
     }
 
-    // Tratamento de fuso horário local: decompõe ano/mês/dia para evitar salto de UTC
+    // Tratamento de fuso de banco: aplica limite exato de início e fim no dia
     if (query.startDate) {
-      const start = this.parseDateBoundary(query.startDate, false);
+      const start = this.formatDateBoundary(query.startDate, false);
       qb.andWhere('notice.createdAt >= :start', { start });
     }
 
     if (query.endDate) {
-      const end = this.parseDateBoundary(query.endDate, true);
+      const end = this.formatDateBoundary(query.endDate, true);
       qb.andWhere('notice.createdAt <= :end', { end });
     }
 

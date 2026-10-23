@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { NoticesService, NoticeReadStatusResponse } from '../../core/services/notices';
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
@@ -21,7 +22,7 @@ export interface NoticeDetail {
 @Component({
   selector: 'app-notices',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, RouterLink],
   templateUrl: './notices.html',
   styleUrls: ['./notices.scss']
 })

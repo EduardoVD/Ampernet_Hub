@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,7 +20,7 @@ import { EmptyStateComponent } from '../../core/components/empty-state/empty-sta
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, RouterLink],
   templateUrl: './reports.html',
   styleUrls: ['./reports.scss'],
 })
@@ -29,6 +30,8 @@ export class ReportsComponent implements OnInit {
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
   private destroyRef = inject(DestroyRef);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   currentUser = this.authService.currentUser;
 
@@ -89,6 +92,25 @@ export class ReportsComponent implements OnInit {
         this.loadData();
       });
 
+    // Detecta aba inicial via query param (?tab=notices ou ?tab=issues)
+    const initialTab = this.route.snapshot.queryParamMap.get('tab');
+    if (initialTab === 'notices' || initialTab === 'recados') {
+      this.activeTab.set('notices');
+    } else if (initialTab === 'issues' || initialTab === 'problemas') {
+      this.activeTab.set('issues');
+    }
+
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const tab = params['tab'];
+      if ((tab === 'notices' || tab === 'recados') && this.activeTab() !== 'notices') {
+        this.activeTab.set('notices');
+        this.loadData();
+      } else if ((tab === 'issues' || tab === 'problemas') && this.activeTab() !== 'issues') {
+        this.activeTab.set('issues');
+        this.loadData();
+      }
+    });
+
     this.applyPreset('30days', false);
     this.periodPreset.set('custom');
     this.loadData();
@@ -104,8 +126,53 @@ export class ReportsComponent implements OnInit {
     this.noticeSearch$.next(value);
   }
 
+  onStartDateChange(value: string): void {
+    if (this.startDate() === value) return;
+    this.startDate.set(value);
+    if (value && this.endDate() && value > this.endDate()) {
+      this.endDate.set(value);
+    }
+    this.periodPreset.set('custom');
+    this.loadData();
+  }
+
+  onEndDateChange(value: string): void {
+    if (this.endDate() === value) return;
+    this.endDate.set(value);
+    if (value && this.startDate() && value < this.startDate()) {
+      this.startDate.set(value);
+    }
+    this.periodPreset.set('custom');
+    this.loadData();
+  }
+
+  onIssueStatusChange(value: 'all' | 'ongoing' | 'resolved'): void {
+    this.issueStatus.set(value);
+    this.loadData();
+  }
+
+  onNoticeCategoryChange(value: string): void {
+    this.noticeCategory.set(value);
+    this.loadData();
+  }
+
+  onIncludeDeletedIssuesChange(value: boolean): void {
+    this.includeDeletedIssues.set(value);
+    this.loadData();
+  }
+
+  onIncludeDeletedNoticesChange(value: boolean): void {
+    this.includeDeletedNotices.set(value);
+    this.loadData();
+  }
+
   setTab(tab: 'issues' | 'notices'): void {
     this.activeTab.set(tab);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge'
+    });
     this.loadData();
   }
 
@@ -229,83 +296,6 @@ export class ReportsComponent implements OnInit {
     this.noticeReadStatus.set(null);
   }
 
-  exportCsv(): void {
-    if (!this.canExport()) {
-      this.toastService.warning('Apenas supervisores e administradores podem exportar relatórios.', 'Acesso Restrito');
-      return;
-    }
-
-    const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-
-    if (this.activeTab() === 'issues') {
-      const data = this.issuesData();
-      if (!data || !data.items.length) {
-        this.toastService.warning('Nenhum registro para exportar com os filtros atuais.', 'Relatório Vazio');
-        return;
-      }
-
-      const headers = [
-        'ID',
-        'Título',
-        'Descrição',
-        'Status',
-        'Data Início',
-        'Data Resolução',
-        'Duração',
-        'Operador Responsável',
-        'E-mail Operador',
-      ];
-
-      const rows = data.items.map((i) => [
-        i.id,
-        i.title,
-        i.description,
-        i.status === 'resolved' ? 'Resolvido' : 'Em andamento',
-        this.formatDateTime(i.startedAt),
-        i.resolvedAt ? this.formatDateTime(i.resolvedAt) : 'N/A',
-        i.durationFormatted,
-        i.author?.name || 'Não informado',
-        i.author?.email || 'N/A',
-      ]);
-
-      this.reportsService.exportToCsv(`Relatorio_Ocorrencias_AmperHub_${todayStr}`, headers, rows);
-      this.toastService.success('Relatório de ocorrências baixado com sucesso em CSV!', 'Exportação Concluída');
-    } else {
-      const data = this.noticesData();
-      if (!data || !data.items.length) {
-        this.toastService.warning('Nenhum comunicado para exportar com os filtros atuais.', 'Relatório Vazio');
-        return;
-      }
-
-      const headers = [
-        'ID',
-        'Título',
-        'Categoria',
-        'Conteúdo',
-        'Data Publicação',
-        'Autor',
-        'Leituras Confirmadas',
-        'Total Colaboradores',
-        '% Adesão',
-      ];
-
-      const rows = data.items.map((n) => [
-        n.id,
-        n.title,
-        n.category,
-        n.content,
-        this.formatDateTime(n.createdAt),
-        n.author?.name || 'Não informado',
-        n.readCount,
-        n.totalUsers,
-        `${n.readPercentage}%`,
-      ]);
-
-      this.reportsService.exportToCsv(`Relatorio_Comunicados_AmperHub_${todayStr}`, headers, rows);
-      this.toastService.success('Relatório de comunicados baixado com sucesso em CSV!', 'Exportação Concluída');
-    }
-  }
-
   printReport(): void {
     if (!this.canExport()) {
       this.toastService.warning('Apenas supervisores e administradores podem imprimir relatórios.', 'Acesso Restrito');
@@ -315,8 +305,64 @@ export class ReportsComponent implements OnInit {
   }
 
   formatDateTime(isoDate?: string | null): string {
+    if (!isoDate) return 'Sem Resolução';
+    const d = new Date(isoDate);
+    const date = d.toLocaleDateString('pt-BR');
+    const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `${date} · ${time}`;
+  }
+
+  formatDate(isoDate?: string | null): string {
     if (!isoDate) return '—';
     const d = new Date(isoDate);
-    return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+    return d.toLocaleDateString('pt-BR');
+  }
+
+  formatTime(isoDate?: string | null): string {
+    if (!isoDate) return '';
+    const d = new Date(isoDate);
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  formatDuration(duration?: string): string {
+    if (!duration) return '—';
+    return duration.replace(/\(decorrido\)/gi, '(Decorrido)');
+  }
+
+  formatPeriodDisplay(): string {
+    const start = this.startDate();
+    const end = this.endDate();
+    if (!start && !end) return 'Todo o Histórico (Sem restrição de data)';
+
+    const formatYMDToBR = (val?: string) => {
+      if (!val) return '';
+      const parts = val.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return val;
+    };
+
+    if (start && end) {
+      return `${formatYMDToBR(start)} até ${formatYMDToBR(end)}`;
+    } else if (start) {
+      return `A partir de ${formatYMDToBR(start)}`;
+    } else {
+      return `Até ${formatYMDToBR(end)}`;
+    }
+  }
+
+  getStatusLabel(): string {
+    const s = this.issueStatus();
+    if (s === 'ongoing') return 'Apenas Em Andamento';
+    if (s === 'resolved') return 'Apenas Resolvidos';
+    return 'Todos os Status';
+  }
+
+  get currentEmissionDate(): string {
+    const d = new Date();
+    const date = d.toLocaleDateString('pt-BR');
+    const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `${date} às ${time}`;
   }
 }

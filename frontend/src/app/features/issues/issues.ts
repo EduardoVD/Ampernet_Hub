@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { IssuesService, IssueItem } from '../../core/services/issues';
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
@@ -10,7 +11,7 @@ import { EmptyStateComponent } from '../../core/components/empty-state/empty-sta
 @Component({
   selector: 'app-issues',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, RouterLink],
   templateUrl: './issues.html',
   styleUrls: ['./issues.scss'],
 })

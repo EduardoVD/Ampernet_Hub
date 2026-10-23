@@ -134,7 +134,6 @@
     <div class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
         <h3>{{ editingId() ? 'Editar Responsável' : 'Novo Responsável na Matriz' }}</h3>
-        <button class="modal-close-btn" (click)="closeModal()">✕</button>
       </header>
 
       <form (ngSubmit)="submitForm()" class="modal-form">

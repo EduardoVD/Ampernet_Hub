@@ -102,34 +102,4 @@ export class ReportsService {
 
     return this.http.get<NoticeHistoryReport>(`${this.apiUrl}/notices`, { params });
   }
-
-  /**
-   * Exporta conjunto de dados para CSV com suporte nativo a acentuação (BOM UTF-8)
-   * e proteção contra injeção de fórmulas CSV (CSV Formula Injection / DDE).
-   */
-  exportToCsv(filename: string, headers: string[], rows: (string | number)[][]): void {
-    const escapeCell = (val: string | number) => {
-      let str = String(val ?? '');
-      // Proteção contra CSV Formula Injection: se o valor começar com =, +, -, @ ou tabulação, prefixa com apóstrofo
-      if (/^[=+\-@\t\r]/.test(str)) {
-        str = `'${str}`;
-      }
-      str = str.replace(/"/g, '""');
-      return `"${str}"`;
-    };
-
-    const headerLine = headers.map(escapeCell).join(';');
-    const rowLines = rows.map((r) => r.map(escapeCell).join(';'));
-    const csvContent = '\uFEFF' + [headerLine, ...rowLines].join('\r\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${filename}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
 }
