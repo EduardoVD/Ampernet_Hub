@@ -40,6 +40,7 @@ export class UsersComponent implements OnInit {
   isPasswordModalOpen = signal(false);
   targetUserForPassword = signal<UserItem | null>(null);
   newPassword = signal('');
+  confirmPassword = signal('');
 
   filteredUsers = computed(() => {
     const search = this.searchTerm().trim().toLowerCase();
@@ -62,10 +63,6 @@ export class UsersComponent implements OnInit {
       return matchSearch && matchRole && matchStatus;
     });
   });
-
-  totalCount = computed(() => this.users().length);
-  activeCount = computed(() => this.users().filter((u) => u.isActive).length);
-  adminCount = computed(() => this.users().filter((u) => u.role === 'admin').length);
 
   ngOnInit(): void {
     this.loadUsers();
@@ -221,6 +218,7 @@ export class UsersComponent implements OnInit {
     if (event) event.stopPropagation();
     this.targetUserForPassword.set(user);
     this.newPassword.set('');
+    this.confirmPassword.set('');
     this.isPasswordModalOpen.set(true);
   }
 
@@ -228,14 +226,21 @@ export class UsersComponent implements OnInit {
     this.isPasswordModalOpen.set(false);
     this.targetUserForPassword.set(null);
     this.newPassword.set('');
+    this.confirmPassword.set('');
   }
 
   submitNewPassword(): void {
     const user = this.targetUserForPassword();
     const pass = this.newPassword().trim();
+    const confirm = this.confirmPassword().trim();
 
     if (!user || !pass || pass.length < 6) {
       this.toastService.warning('A nova senha deve ter no mínimo 6 caracteres.', 'Senha Inválida');
+      return;
+    }
+
+    if (pass !== confirm) {
+      this.toastService.warning('As senhas digitadas não coincidem. Verifique a confirmação.', 'Senhas Não Coincidem');
       return;
     }
 

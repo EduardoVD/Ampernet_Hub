@@ -2,25 +2,11 @@
   <!-- Barra Superior -->
   <section class="page-title-bar">
     <div class="title-left">
-      <h2>GESTÃO DE COlABORADORES E ACESSOS</h2>
+      <h2>GESTÃO DE COLABORADORES E ACESSOS</h2>
       <p>Gerenciamento de contas, perfis de permissão e status de acesso ao sistema</p>
     </div>
 
     <div class="title-right">
-      <div class="quick-stats">
-        <span class="stat-item" title="Total de usuários">
-          <strong>{{ totalCount() }}</strong> total
-        </span>
-        <span class="stat-divider">•</span>
-        <span class="stat-item active" title="Usuários com conta ativa">
-          <strong>{{ activeCount() }}</strong> ativos
-        </span>
-        <span class="stat-divider">•</span>
-        <span class="stat-item admin" title="Administradores do sistema">
-          <strong>{{ adminCount() }}</strong> admins
-        </span>
-      </div>
-
       <button class="btn-new-user" (click)="openCreateModal()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -85,29 +71,30 @@
         <thead>
           <tr>
             <th>COLABORADOR</th>
+            <th>E-MAIL</th>
             <th>CARGO / PERMISSÃO</th>
             <th>STATUS</th>
             <th>CADASTRADO EM</th>
-            <th class="th-actions">AÇÕES</th>
+            <th>AÇÕES</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let user of filteredUsers()" [class.inactive-row]="!user.isActive">
             <td class="col-user">
-              <div class="user-avatar" [class.admin-avatar]="user.role === 'admin'">
-                {{ (user.name || 'U').charAt(0).toUpperCase() }}
-              </div>
-              <div class="user-info">
-                <span class="user-name">
-                  {{ user.name }}
-                  <span *ngIf="currentUser()?.id === user.id" class="you-badge">(Você)</span>
-                </span>
-                <span class="user-email">{{ user.email }}</span>
-              </div>
+              <span class="user-name">
+                {{ user.name }}
+                <span *ngIf="currentUser()?.id === user.id" class="you-text">(Você)</span>
+              </span>
             </td>
 
-            <td>
-              <span class="role-badge" [ngClass]="user.role">
+            <td class="col-email">
+              <a [href]="'mailto:' + user.email" class="email-link">
+                {{ user.email }}
+              </a>
+            </td>
+
+            <td class="col-role">
+              <span class="role-text" [ngClass]="user.role">
                 {{ formatRole(user.role) }}
               </span>
             </td>
@@ -176,7 +163,7 @@
           </tr>
 
           <tr *ngIf="filteredUsers().length === 0">
-            <td colspan="5" class="empty-cell">
+            <td colspan="6" class="empty-cell">
               <app-empty-state
                 icon="users"
                 title="Nenhum colaborador encontrado"
@@ -252,9 +239,9 @@
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" *ngIf="!editingUserId()">
           <label for="form-password">
-            {{ editingUserId() ? 'Nova Senha (deixe em branco para manter a atual)' : 'Senha Inicial *' }}
+            Senha Inicial *
           </label>
           <input
             id="form-password"
@@ -262,8 +249,8 @@
             [ngModel]="formPassword()"
             (ngModelChange)="formPassword.set($event)"
             name="password"
-            [placeholder]="editingUserId() ? 'Opcional (mínimo 6 caracteres)' : 'Mínimo de 6 caracteres'"
-            [required]="!editingUserId()"
+            placeholder="Mínimo de 6 caracteres"
+            required
           />
         </div>
 
@@ -284,31 +271,58 @@
         <h3>Redefinir Senha</h3>
       </header>
 
-      <div class="modal-body-mini">
-        <p class="target-desc">
-          Definindo nova senha para <strong>{{ targetUserForPassword()?.name }}</strong> ({{ targetUserForPassword()?.email }})
-        </p>
+      <form (ngSubmit)="submitNewPassword()">
+        <div class="modal-body-mini">
+          <p class="target-desc">
+            Definindo nova senha para <strong>{{ targetUserForPassword()?.name }}</strong> ({{ targetUserForPassword()?.email }})
+          </p>
 
-        <div class="form-group">
-          <label for="new-pass">Nova Senha *</label>
-          <input
-            id="new-pass"
-            type="password"
-            [ngModel]="newPassword()"
-            (ngModelChange)="newPassword.set($event)"
-            placeholder="Digite a nova senha (mínimo 6 caracteres)"
-            minlength="6"
-            required
-          />
+          <div class="form-group">
+            <label for="new-pass">Nova Senha *</label>
+            <input
+              id="new-pass"
+              type="password"
+              [ngModel]="newPassword()"
+              (ngModelChange)="newPassword.set($event)"
+              name="newPassword"
+              placeholder="Digite a nova senha (mínimo 6 caracteres)"
+              minlength="6"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-pass">Confirmar Nova Senha *</label>
+            <input
+              id="confirm-pass"
+              type="password"
+              [ngModel]="confirmPassword()"
+              (ngModelChange)="confirmPassword.set($event)"
+              name="confirmPassword"
+              placeholder="Repita a nova senha para confirmação"
+              minlength="6"
+              required
+            />
+            <span
+              *ngIf="confirmPassword() && newPassword() !== confirmPassword()"
+              class="field-error-text"
+            >
+              As senhas não coincidem.
+            </span>
+          </div>
         </div>
-      </div>
 
-      <footer class="modal-footer">
-        <button type="button" class="btn-cancel" (click)="closePasswordModal()">Cancelar</button>
-        <button type="button" class="btn-submit" (click)="submitNewPassword()" [disabled]="isSubmitting()">
-          {{ isSubmitting() ? 'Salvando...' : 'Atualizar Senha' }}
-        </button>
-      </footer>
+        <footer class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closePasswordModal()">Cancelar</button>
+          <button
+            type="submit"
+            class="btn-submit"
+            [disabled]="isSubmitting() || (confirmPassword() && newPassword() !== confirmPassword())"
+          >
+            {{ isSubmitting() ? 'Salvando...' : 'Atualizar Senha' }}
+          </button>
+        </footer>
+      </form>
     </div>
   </div>
 </div>

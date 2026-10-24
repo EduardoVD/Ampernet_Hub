@@ -62,38 +62,6 @@
     align-items: center;
     gap: 1.25rem;
 
-    .quick-stats {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 0.45rem 0.9rem;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      font-family: $font-title;
-      font-size: 0.85rem;
-      color: $text-muted;
-
-      .stat-item {
-        strong {
-          color: $text-light;
-          font-weight: 700;
-        }
-
-        &.active strong {
-          color: $success;
-        }
-
-        &.admin strong {
-          color: $accent-light;
-        }
-      }
-
-      .stat-divider {
-        color: rgba(255, 255, 255, 0.2);
-      }
-    }
-
     .btn-new-user {
       @include btn-primary;
       padding: 0.6rem 1.15rem;
@@ -130,32 +98,50 @@
 
       .search-icon {
         position: absolute;
-        left: 0.85rem;
+        left: 0.95rem;
         color: $text-muted;
         pointer-events: none;
       }
 
       input {
-        padding-left: 2.35rem;
+        @include input-field;
+        padding: 0.55rem 0.95rem 0.55rem 2.5rem;
         width: 100%;
+        font-size: 0.9rem;
+        box-sizing: border-box;
       }
     }
 
-    input, select {
+    input {
       @include input-field;
-      padding: 0.55rem 0.85rem;
+      padding: 0.55rem 0.95rem;
       font-size: 0.9rem;
       box-sizing: border-box;
+    }
+
+    select {
+      @include input-field;
+      padding: 0.55rem 2.4rem 0.55rem 0.95rem;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+      cursor: pointer;
+      min-width: 170px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.45)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.95rem center;
+      background-size: 14px;
+
+      &:hover {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.75)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      }
 
       option {
         background-color: $card-bg;
         color: $text-light;
       }
-    }
-
-    select {
-      cursor: pointer;
-      min-width: 170px;
     }
   }
 }
@@ -176,26 +162,23 @@
 
     .users-table {
       width: 100%;
-      min-width: 650px;
+      min-width: 750px;
       border-collapse: collapse;
 
       thead th {
         position: sticky;
         top: 0;
         background-color: $bg-sidebar;
-        color: $accent;
+        color: $text-muted;
         font-family: $font-title;
         font-size: 0.78rem;
         font-weight: 700;
-        text-align: left;
+        text-align: center;
         padding: 0.85rem 1.15rem;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         z-index: 2;
-
-        &.th-actions {
-          text-align: right;
-          padding-right: 1.5rem;
-        }
       }
 
       tbody tr {
@@ -215,87 +198,73 @@
         padding: 0.85rem 1.15rem;
         font-family: $font-body;
         font-size: 0.92rem;
+        text-align: center;
         vertical-align: middle;
 
         &.col-user {
-          display: flex;
-          align-items: center;
-          gap: 0.85rem;
-
-          .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: $accent-strong;
-            color: $text-light;
+          .user-name {
             font-family: $font-title;
-            font-weight: 700;
-            font-size: 0.95rem;
-            display: flex;
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: $text-light;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            gap: 0.35rem;
+            line-height: 1.2;
 
-            &.admin-avatar {
-              background: $accent;
-              box-shadow: 0 0 10px rgba($accent, 0.35);
-            }
-          }
-
-          .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-
-            .user-name {
-              font-family: $font-title;
-              font-weight: 600;
-              font-size: 0.92rem;
-              color: $text-light;
-              display: flex;
-              align-items: center;
-              gap: 0.4rem;
-
-              .you-badge {
-                font-size: 0.72rem;
-                color: $accent-light;
-                font-weight: 500;
-              }
-            }
-
-            .user-email {
+            .you-text,
+            .you-badge {
               font-size: 0.82rem;
-              color: $text-muted;
+              color: $accent-light;
+              font-weight: 500;
+              margin-left: 0.15rem;
+              background: transparent !important;
+              border: none !important;
+              padding: 0 !important;
+              line-height: 1.2;
+              vertical-align: middle;
             }
           }
         }
 
+        &.col-email {
+          .email-link,
+          .user-email {
+            font-size: 0.88rem;
+            color: $accent-light;
+            font-family: $font-body;
+            text-decoration: none;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+
+            &:hover {
+              color: $accent-light;
+              text-decoration: underline;
+            }
+          }
+        }
+
+        .role-text,
         .role-badge {
           display: inline-block;
-          padding: 0.25rem 0.65rem;
-          border-radius: 6px;
           font-family: $font-title;
-          font-size: 0.75rem;
+          font-size: 0.88rem;
           font-weight: 600;
-          letter-spacing: 0.03em;
+          line-height: 1.2;
+          background: transparent !important;
+          border: none !important;
+          padding: 0 !important;
 
           &.admin {
-            background: rgba($accent, 0.2);
             color: $accent-light;
-            border: 1px solid rgba($accent, 0.4);
           }
 
           &.supervisor {
-            background: rgba($info, 0.18);
             color: $info;
-            border: 1px solid rgba($info, 0.35);
           }
 
           &.user {
-            background: rgba(255, 255, 255, 0.08);
             color: $text-soft;
-            border: 1px solid rgba(255, 255, 255, 0.12);
           }
         }
 
@@ -355,8 +324,7 @@
         }
 
         &.td-actions {
-          text-align: right;
-          padding-right: 1.5rem;
+          text-align: center;
 
           .btn-action {
             background: rgba(255, 255, 255, 0.05);
@@ -369,7 +337,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            margin-left: 0.4rem;
+            margin: 0 0.2rem;
             transition: all 0.2s ease;
 
             &:hover:not(:disabled) {
@@ -507,11 +475,30 @@
           color: $text-muted;
         }
 
-        input, select {
+        input {
           @include input-field;
-          padding: 0.6rem 0.85rem;
+          padding: 0.6rem 0.95rem;
           font-size: 0.92rem;
           box-sizing: border-box;
+        }
+
+        select {
+          @include input-field;
+          padding: 0.6rem 2.4rem 0.6rem 0.95rem;
+          font-size: 0.92rem;
+          box-sizing: border-box;
+          cursor: pointer;
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.45)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 0.95rem center;
+          background-size: 14px;
+
+          &:hover {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.75)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          }
 
           option {
             background-color: $card-bg;
@@ -519,8 +506,12 @@
           }
         }
 
-        select {
-          cursor: pointer;
+        .field-error-text {
+          font-size: 0.78rem;
+          color: $accent-light;
+          font-family: $font-body;
+          font-weight: 500;
+          margin-top: 0.2rem;
         }
       }
     }
