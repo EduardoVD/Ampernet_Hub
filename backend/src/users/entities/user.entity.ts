@@ -20,6 +20,10 @@ export class User {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
+  //Português - Setor / Departamento do colaborador.
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  sector?: string;
+
   //Português - E-mail único para login no sistema.
   @Column({ type: 'varchar', length: 150, unique: true })
   email: string;

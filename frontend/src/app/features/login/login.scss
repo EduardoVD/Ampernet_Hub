@@ -134,7 +134,7 @@
 
             .prefix-icon {
               position: absolute;
-              left: 1rem;
+              left: 1.15rem;
               z-index: 2;
               display: block;
               pointer-events: none;
@@ -145,7 +145,7 @@
               background-color: $input-bg;
               border: 1px solid $border-strong;
               border-radius: 12px;
-              padding: 0.95rem 3rem 0.95rem 3rem;
+              padding: 0.95rem 3.25rem 0.95rem 3.25rem;
               color: $text-light;
               font-family: $font-body;
               font-size: 1.05rem;
@@ -167,7 +167,7 @@
 
             .suffix-btn {
               position: absolute;
-              right: 1rem;
+              right: 1.15rem;
               z-index: 2;
               background: none;
               border: none;

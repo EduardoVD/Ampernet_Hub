@@ -60,7 +60,12 @@
   .title-right {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 0.85rem;
+
+    .btn-manage-sectors {
+      @include btn-secondary;
+      padding: 0.6rem 1.15rem;
+    }
 
     .btn-new-user {
       @include btn-primary;
@@ -98,14 +103,14 @@
 
       .search-icon {
         position: absolute;
-        left: 0.95rem;
+        left: 1.15rem;
         color: $text-muted;
         pointer-events: none;
       }
 
       input {
         @include input-field;
-        padding: 0.55rem 0.95rem 0.55rem 2.5rem;
+        padding: 0.55rem 0.95rem 0.55rem 2.85rem;
         width: 100%;
         font-size: 0.9rem;
         box-sizing: border-box;
@@ -120,28 +125,11 @@
     }
 
     select {
-      @include input-field;
-      padding: 0.55rem 2.4rem 0.55rem 0.95rem;
+      @include select-field;
+      padding: 0.55rem 2.75rem 0.55rem 0.95rem;
       font-size: 0.9rem;
       box-sizing: border-box;
-      cursor: pointer;
       min-width: 170px;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.45)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.95rem center;
-      background-size: 14px;
-
-      &:hover {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.75)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      }
-
-      option {
-        background-color: $card-bg;
-        color: $text-light;
-      }
     }
   }
 }
@@ -241,6 +229,15 @@
               color: $accent-light;
               text-decoration: underline;
             }
+          }
+        }
+
+        &.col-sector {
+          .sector-text {
+            font-family: $font-title;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: $text-light;
           }
         }
 
@@ -483,27 +480,10 @@
         }
 
         select {
-          @include input-field;
-          padding: 0.6rem 2.4rem 0.6rem 0.95rem;
+          @include select-field;
+          padding: 0.6rem 2.75rem 0.6rem 0.95rem;
           font-size: 0.92rem;
           box-sizing: border-box;
-          cursor: pointer;
-          appearance: none;
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.45)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-          background-repeat: no-repeat;
-          background-position: right 0.95rem center;
-          background-size: 14px;
-
-          &:hover {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.75)' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-          }
-
-          option {
-            background-color: $card-bg;
-            color: $text-light;
-          }
         }
 
         .field-error-text {
@@ -533,6 +513,255 @@
         @include btn-primary;
         padding: 0.55rem 1.25rem;
         font-size: 0.85rem;
+      }
+    }
+
+    &.sectors-modal-card {
+      max-width: 680px;
+      width: 92%;
+
+      .modal-header {
+        .modal-subtitle {
+          font-family: $font-body;
+          font-size: 0.82rem;
+          color: $text-muted;
+          margin: 0.25rem 0 0 0;
+        }
+
+        .modal-close-btn {
+          @include btn-ghost;
+          font-size: 1.15rem;
+          padding: 0.35rem 0.5rem;
+          color: $text-muted;
+          line-height: 1;
+
+          &:hover {
+            color: $text-light;
+          }
+        }
+      }
+
+      .sectors-modal-body {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.15rem;
+        max-height: calc(85vh - 140px);
+        overflow-y: auto;
+        @include hide-scrollbar;
+
+        .add-sector-card {
+          @include surface-card($radius-md);
+          padding: 0.95rem 1.15rem;
+          background-color: rgba($dark-bg, 0.6);
+          border-color: $line-soft;
+
+          label {
+            @include eyebrow;
+            display: block;
+            margin-bottom: 0.45rem;
+          }
+
+          .input-action-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+
+            input {
+              @include input-field;
+              flex: 1;
+              padding: 0.55rem 0.95rem;
+              font-size: 0.9rem;
+            }
+
+            .btn-submit-sector {
+              @include btn-primary;
+              padding: 0.55rem 1.15rem;
+              font-size: 0.86rem;
+              white-space: nowrap;
+              flex-shrink: 0;
+            }
+          }
+        }
+
+        .sectors-list-wrap {
+          display: flex;
+          flex-direction: column;
+          gap: 0.85rem;
+
+          .sectors-loading,
+          .sectors-empty {
+            text-align: center;
+            padding: 2.25rem 1rem;
+            color: $text-muted;
+            font-size: 0.9rem;
+            font-family: $font-body;
+          }
+
+          .sectors-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+
+            .sector-card {
+              @include surface-card($radius-md);
+              border-color: $line-faint;
+              overflow: hidden;
+
+              .sector-card-header {
+                background-color: $bg-sidebar;
+                padding: 0.75rem 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid $line-faint;
+                cursor: pointer;
+                user-select: none;
+                transition: background-color 0.15s ease;
+
+                &:hover {
+                  background-color: rgba(255, 255, 255, 0.04);
+                }
+
+                .sector-header-left {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.65rem;
+
+                  .sector-icon {
+                    color: $accent-light;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 26px;
+                    height: 26px;
+                    border-radius: $radius-sm;
+                    background: rgba($accent, 0.12);
+                    border: 1px solid rgba($accent, 0.28);
+                    flex-shrink: 0;
+                  }
+
+                  .sector-name {
+                    font-family: $font-title;
+                    font-size: 0.92rem;
+                    font-weight: 700;
+                    color: $text-light;
+                    margin: 0;
+                  }
+
+                  .sector-count-badge {
+                    font-family: $font-title;
+                    font-size: 0.72rem;
+                    font-weight: 600;
+                    padding: 0.15rem 0.55rem;
+                    border-radius: $radius-pill;
+                    background: rgba(255, 255, 255, 0.06);
+                    color: $text-muted;
+                    border: 1px solid $line-faint;
+
+                    &.has-collabs {
+                      background: rgba($success, 0.12);
+                      color: $success;
+                      border-color: rgba($success, 0.28);
+                    }
+                  }
+                }
+
+                .sector-header-actions {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.35rem;
+
+                  .btn-delete-sector {
+                    @include btn-ghost;
+                    padding: 0.35rem 0.5rem;
+                    color: $text-muted;
+                    border-radius: $radius-sm;
+
+                    &:hover {
+                      color: $accent;
+                      background: rgba($accent, 0.12);
+                    }
+                  }
+
+                  .btn-toggle-expand {
+                    @include btn-ghost;
+                    padding: 0.35rem;
+                    color: $text-muted;
+                    border-radius: $radius-sm;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    .chevron-icon {
+                      transition: transform 0.2s ease;
+                      &.rotated {
+                        transform: rotate(180deg);
+                      }
+                    }
+
+                    &:hover {
+                      color: $text-light;
+                      background: rgba(255, 255, 255, 0.06);
+                    }
+                  }
+                }
+              }
+
+              .sector-collabs-body {
+                padding: 0.85rem 1rem;
+
+                .no-collabs-msg {
+                  font-size: 0.82rem;
+                  color: $text-dim;
+                  font-family: $font-body;
+                }
+
+                .collabs-tags-grid {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+                  gap: 0.6rem;
+
+                  .collab-badge-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.6rem;
+                    background: rgba(255, 255, 255, 0.025);
+                    border: 1px solid $line-faint;
+                    border-radius: $radius-sm;
+                    padding: 0.45rem 0.75rem;
+
+                    .collab-avatar {
+                      width: 26px;
+                      height: 26px;
+                      border-radius: 50%;
+                      background: $bg-sidebar;
+                      color: $accent-light;
+                      font-family: $font-title;
+                      font-weight: 700;
+                      font-size: 0.75rem;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                      border: 1px solid rgba($accent, 0.25);
+                    }
+
+                    .collab-name {
+                      font-family: $font-title;
+                      font-size: 0.84rem;
+                      font-weight: 600;
+                      color: $text-light;
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

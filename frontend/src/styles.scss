@@ -67,6 +67,26 @@ table,
   }
 }
 
+// Padronização global de selects e inputs com ícones em todo o sistema
+select {
+  @include select-field;
+}
+
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    margin-right: 0.65rem;
+    opacity: 0.65;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
 /* ======================================================== */
 /* ESTILOS GLOBAIS DE IMPRESSÃO (PDF / EXPORTAÇÃO) */
 /* ======================================================== */

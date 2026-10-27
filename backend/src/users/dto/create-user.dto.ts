@@ -26,6 +26,17 @@ export class CreateUserDto {
   @MaxLength(150, { message: 'O e-mail deve ter no máximo 150 caracteres' })
   email!: string;
 
+  //Português - Documenta o campo de setor/departamento.
+  @ApiProperty({
+    description: 'Setor / Departamento do colaborador no sistema (Máx: 100 caracteres)',
+    example: 'Administração',
+  })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString({ message: 'O setor deve ser um texto' })
+  @IsNotEmpty({ message: 'O setor é obrigatório' })
+  @MaxLength(100, { message: 'O setor deve ter no máximo 100 caracteres' })
+  sector!: string;
+
   //Português - Documenta o campo de senha de acesso.
   @ApiProperty({
     description: 'Senha de acesso (Mínimo de 6 e máximo de 100 caracteres)',

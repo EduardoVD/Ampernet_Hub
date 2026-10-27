@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService, UserItem } from '../../core/services/users';
+import { SectorsService, SectorWithCollaboratorsItem, SectorItem } from '../../core/services/sectors';
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
 import { ConfirmService } from '../../core/services/confirm';
@@ -17,6 +18,7 @@ import { EmptyStateComponent } from '../../core/components/empty-state/empty-sta
 export class UsersComponent implements OnInit {
   private usersService = inject(UsersService);
   private authService = inject(AuthService);
+  private sectorsService = inject(SectorsService);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
 
@@ -24,7 +26,17 @@ export class UsersComponent implements OnInit {
   users = signal<UserItem[]>([]);
   isLoading = signal(false);
 
+  // Setores e Departamentos
+  sectorsList = signal<SectorItem[]>([]);
+  isSectorsModalOpen = signal(false);
+  sectorsWithCollaborators = signal<SectorWithCollaboratorsItem[]>([]);
+  isLoadingSectors = signal(false);
+  newSectorName = signal('');
+  isCreatingSector = signal(false);
+  expandedSectorIds = signal<Set<number>>(new Set());
+
   searchTerm = signal('');
+  sectorFilter = signal<string>('all');
   roleFilter = signal<'all' | 'admin' | 'supervisor' | 'user'>('all');
   statusFilter = signal<'all' | 'active' | 'inactive'>('all');
 
@@ -32,6 +44,7 @@ export class UsersComponent implements OnInit {
   editingUserId = signal<number | null>(null);
   formName = signal('');
   formEmail = signal('');
+  formSector = signal('');
   formPassword = signal('');
   formRole = signal<'admin' | 'supervisor' | 'user'>('user');
   formIsActive = signal(true);
@@ -44,6 +57,7 @@ export class UsersComponent implements OnInit {
 
   filteredUsers = computed(() => {
     const search = this.searchTerm().trim().toLowerCase();
+    const sector = this.sectorFilter();
     const role = this.roleFilter();
     const status = this.statusFilter();
 
@@ -51,7 +65,12 @@ export class UsersComponent implements OnInit {
       const matchSearch =
         !search ||
         user.name.toLowerCase().includes(search) ||
-        user.email.toLowerCase().includes(search);
+        user.email.toLowerCase().includes(search) ||
+        (user.sector && user.sector.toLowerCase().includes(search));
+
+      const matchSector =
+        sector === 'all' ||
+        (user.sector && user.sector.trim().toLowerCase() === sector.trim().toLowerCase());
 
       const matchRole = role === 'all' || user.role === role;
 
@@ -60,12 +79,13 @@ export class UsersComponent implements OnInit {
         (status === 'active' && user.isActive) ||
         (status === 'inactive' && !user.isActive);
 
-      return matchSearch && matchRole && matchStatus;
+      return matchSearch && matchSector && matchRole && matchStatus;
     });
   });
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadSectors();
   }
 
   loadUsers(): void {
@@ -82,10 +102,18 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  loadSectors(): void {
+    this.sectorsService.getSectors().subscribe({
+      next: (data) => this.sectorsList.set(data),
+      error: (err) => console.error('Erro ao carregar lista de setores:', err),
+    });
+  }
+
   openCreateModal(): void {
     this.editingUserId.set(null);
     this.formName.set('');
     this.formEmail.set('');
+    this.formSector.set('');
     this.formPassword.set('');
     this.formRole.set('user');
     this.formIsActive.set(true);
@@ -98,6 +126,7 @@ export class UsersComponent implements OnInit {
     this.editingUserId.set(user.id);
     this.formName.set(user.name);
     this.formEmail.set(user.email);
+    this.formSector.set(user.sector || '');
     this.formPassword.set('');
     this.formRole.set(user.role);
     this.formIsActive.set(user.isActive);
@@ -112,6 +141,7 @@ export class UsersComponent implements OnInit {
   submitForm(): void {
     const name = this.formName().trim();
     const email = this.formEmail().trim();
+    const sector = this.formSector().trim();
     const password = this.formPassword().trim();
     const role = this.formRole();
     const isActive = this.formIsActive();
@@ -119,6 +149,11 @@ export class UsersComponent implements OnInit {
 
     if (!name || !email) {
       this.toastService.warning('Por favor, preencha o Nome e o E-mail corporativo.', 'Campos Obrigatórios');
+      return;
+    }
+
+    if (!sector) {
+      this.toastService.warning('Por favor, selecione o Setor do colaborador.', 'Campo Obrigatório');
       return;
     }
 
@@ -133,6 +168,7 @@ export class UsersComponent implements OnInit {
       const payload: any = {
         name,
         email,
+        sector,
         role,
         isActive
       };
@@ -150,7 +186,8 @@ export class UsersComponent implements OnInit {
         error: (err) => {
           this.isSubmitting.set(false);
           console.error('Erro ao atualizar usuário:', err);
-          this.toastService.error('Erro ao atualizar colaborador. Verifique se o e-mail já não está em uso.', 'Erro');
+          const msg = err.error?.message || 'Erro ao atualizar colaborador. Verifique se o e-mail já não está em uso.';
+          this.toastService.error(msg, 'Erro');
         }
       });
     } else {
@@ -158,6 +195,7 @@ export class UsersComponent implements OnInit {
         .createUser({
           name,
           email,
+          sector,
           password,
           role,
           isActive
@@ -172,7 +210,8 @@ export class UsersComponent implements OnInit {
           error: (err) => {
             this.isSubmitting.set(false);
             console.error('Erro ao cadastrar usuário:', err);
-            this.toastService.error('Erro ao cadastrar colaborador. Verifique se o e-mail já está cadastrado.', 'Erro');
+            const msg = err.error?.message || 'Erro ao cadastrar colaborador. Verifique se o e-mail já está cadastrado.';
+            this.toastService.error(msg, 'Erro');
           }
         });
     }
@@ -188,26 +227,27 @@ export class UsersComponent implements OnInit {
 
     const actionText = user.isActive ? 'desativar' : 'reativar';
     this.confirmService.confirm({
-      title: `${user.isActive ? 'Desativar' : 'Reativar'} Conta`,
-      message: `Deseja realmente ${actionText} o acesso do colaborador "${user.name}"?`,
+      title: `${user.isActive ? 'Desativar' : 'Reativar'} Colaborador`,
+      message: `Tem certeza que deseja ${actionText} o acesso de "${user.name}"?`,
       confirmText: user.isActive ? 'Sim, Desativar' : 'Sim, Reativar',
       cancelText: 'Cancelar',
-      type: user.isActive ? 'warning' : 'primary'
+      type: user.isActive ? 'danger' : 'primary'
     }).then((confirmed) => {
       if (confirmed) {
         this.usersService.updateUser(user.id, { isActive: !user.isActive }).subscribe({
-          next: () => {
+          next: (updated) => {
             this.users.update((list) =>
-              list.map((u) => (u.id === user.id ? { ...u, isActive: !u.isActive } : u))
+              list.map((u) => (u.id === updated.id ? { ...u, isActive: updated.isActive } : u))
             );
             this.toastService.success(
-              `Conta de "${user.name}" ${user.isActive ? 'reativada' : 'desativada'} com sucesso.`,
+              `Colaborador ${updated.name} ${updated.isActive ? 'reativado' : 'desativado'} com sucesso.`,
               'Status Atualizado'
             );
           },
           error: (err) => {
-            console.error('Erro ao alterar status do usuário:', err);
-            this.toastService.error('Não foi possível alterar o status do colaborador.', 'Erro');
+            console.error('Erro ao alternar status do colaborador:', err);
+            const msg = err.error?.message || 'Erro ao alterar status do colaborador.';
+            this.toastService.error(msg, 'Erro');
           }
         });
       }
@@ -234,13 +274,15 @@ export class UsersComponent implements OnInit {
     const pass = this.newPassword().trim();
     const confirm = this.confirmPassword().trim();
 
-    if (!user || !pass || pass.length < 6) {
-      this.toastService.warning('A nova senha deve ter no mínimo 6 caracteres.', 'Senha Inválida');
+    if (!user) return;
+
+    if (!pass || pass.length < 6) {
+      this.toastService.warning('A senha deve conter no mínimo 6 caracteres.', 'Senha Inválida');
       return;
     }
 
     if (pass !== confirm) {
-      this.toastService.warning('As senhas digitadas não coincidem. Verifique a confirmação.', 'Senhas Não Coincidem');
+      this.toastService.warning('As senhas informadas não coincidem. Digite novamente.', 'Confirmação Incorreta');
       return;
     }
 
@@ -249,12 +291,12 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.closePasswordModal();
-        this.toastService.success(`Senha do colaborador "${user.name}" redefinida com sucesso!`, 'Senha Alterada');
+        this.toastService.success(`Senha de ${user.name} redefinida com sucesso!`, 'Senha Atualizada');
       },
       error: (err) => {
         this.isSubmitting.set(false);
         console.error('Erro ao redefinir senha:', err);
-        this.toastService.error('Não foi possível redefinir a senha.', 'Erro');
+        this.toastService.error('Erro ao redefinir senha do colaborador.', 'Erro');
       }
     });
   }
@@ -263,13 +305,13 @@ export class UsersComponent implements OnInit {
     if (event) event.stopPropagation();
 
     if (this.currentUser()?.id === user.id) {
-      this.toastService.warning('Você não pode remover a sua própria conta conectada.', 'Ação Bloqueada');
+      this.toastService.warning('Você não pode excluir sua própria conta conectada.', 'Ação Bloqueada');
       return;
     }
 
     this.confirmService.confirm({
-      title: 'Remover Colaborador',
-      message: `Atenção: Deseja realmente excluir permanentemente a conta de "${user.name}"?`,
+      title: 'Excluir Colaborador',
+      message: `Tem certeza que deseja remover permanentemente o acesso de "${user.name}"? Esta ação não pode ser desfeita.`,
       confirmText: 'Sim, Excluir',
       cancelText: 'Cancelar',
       type: 'danger'
@@ -278,11 +320,12 @@ export class UsersComponent implements OnInit {
         this.usersService.deleteUser(user.id).subscribe({
           next: () => {
             this.users.update((list) => list.filter((u) => u.id !== user.id));
-            this.toastService.success('Colaborador removido com sucesso.', 'Removido');
+            this.toastService.success(`Colaborador "${user.name}" removido com sucesso.`, 'Excluído');
           },
           error: (err) => {
             console.error('Erro ao excluir usuário:', err);
-            this.toastService.error('Não foi possível remover o colaborador.', 'Erro');
+            const msg = err.error?.message || 'Erro ao excluir colaborador.';
+            this.toastService.error(msg, 'Erro');
           }
         });
       }
@@ -295,21 +338,130 @@ export class UsersComponent implements OnInit {
         return 'Administrador';
       case 'supervisor':
         return 'Supervisor';
-      case 'user':
-        return 'Colaborador';
       default:
-        return role;
+        return 'Colaborador';
     }
   }
 
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    const date = new Date(dateStr);
+  formatDate(dateString: string): string {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     });
   }
-}
 
+  // --- Gestão de Setores / Departamentos ---
+  openSectorsModal(): void {
+    this.isSectorsModalOpen.set(true);
+    this.newSectorName.set('');
+    this.expandedSectorIds.set(new Set());
+    this.loadSectorsWithCollaborators();
+  }
+
+  closeSectorsModal(): void {
+    this.isSectorsModalOpen.set(false);
+    this.newSectorName.set('');
+  }
+
+  loadSectorsWithCollaborators(): void {
+    this.isLoadingSectors.set(true);
+    this.sectorsService.getSectorsWithCollaborators().subscribe({
+      next: (data) => {
+        // Ordena decrescente por quantidade de colaboradores (setor com mais colaboradores no topo)
+        const sorted = [...data].sort((a, b) => {
+          if (b.collaboratorsCount !== a.collaboratorsCount) {
+            return b.collaboratorsCount - a.collaboratorsCount;
+          }
+          return a.name.localeCompare(b.name, 'pt-BR');
+        });
+        this.sectorsWithCollaborators.set(sorted);
+        // Por padrão, todos os setores começam recolhidos (colapsados)
+        this.expandedSectorIds.set(new Set());
+        this.isLoadingSectors.set(false);
+      },
+      error: (err) => {
+        this.isLoadingSectors.set(false);
+        console.error('Erro ao carregar setores:', err);
+        this.toastService.error('Erro ao carregar lista de setores.', 'Erro');
+      },
+    });
+  }
+
+  toggleSectorCollapse(sectorId: number, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.expandedSectorIds.update((set) => {
+      const next = new Set(set);
+      if (next.has(sectorId)) {
+        next.delete(sectorId);
+      } else {
+        next.add(sectorId);
+      }
+      return next;
+    });
+  }
+
+  isSectorExpanded(sectorId: number): boolean {
+    return this.expandedSectorIds().has(sectorId);
+  }
+
+  submitNewSector(): void {
+    const name = this.newSectorName().trim();
+    if (!name) {
+      this.toastService.warning('Informe o nome do novo setor.', 'Campo Obrigatório');
+      return;
+    }
+
+    this.isCreatingSector.set(true);
+    this.sectorsService.createSector(name).subscribe({
+      next: (created) => {
+        this.isCreatingSector.set(false);
+        this.newSectorName.set('');
+        this.toastService.success(`Setor "${created.name}" cadastrado com sucesso!`, 'Setor Criado');
+        this.loadSectors();
+        this.loadSectorsWithCollaborators();
+      },
+      error: (err) => {
+        this.isCreatingSector.set(false);
+        const msg = err.error?.message || 'Erro ao cadastrar setor.';
+        this.toastService.error(msg, 'Erro');
+      },
+    });
+  }
+
+  deleteSector(sector: SectorWithCollaboratorsItem, event?: Event): void {
+    if (event) event.stopPropagation();
+
+    if (sector.collaboratorsCount > 0) {
+      this.toastService.warning(
+        `Não é possível remover o setor "${sector.name}" pois há ${sector.collaboratorsCount} colaborador(es) vinculado(s).`,
+        'Setor em Uso'
+      );
+      return;
+    }
+
+    this.confirmService.confirm({
+      title: 'Excluir Setor',
+      message: `Deseja realmente remover o setor "${sector.name}"?`,
+      confirmText: 'Sim, Excluir',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.sectorsService.deleteSector(sector.id).subscribe({
+          next: () => {
+            this.toastService.success(`Setor "${sector.name}" removido com sucesso.`, 'Removido');
+            this.loadSectors();
+            this.loadSectorsWithCollaborators();
+          },
+          error: (err) => {
+            const msg = err.error?.message || 'Erro ao remover setor.';
+            this.toastService.error(msg, 'Erro');
+          }
+        });
+      }
+    });
+  }
+}

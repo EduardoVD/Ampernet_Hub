@@ -7,6 +7,7 @@ export interface UserItem {
   id: number;
   name: string;
   email: string;
+  sector?: string;
   role: 'admin' | 'supervisor' | 'user';
   isActive: boolean;
   createdAt: string;
@@ -17,6 +18,7 @@ export interface CreateUserDto {
   name: string;
   email: string;
   password: string;
+  sector: string;
   role?: 'admin' | 'supervisor' | 'user';
   isActive?: boolean;
 }
@@ -25,6 +27,7 @@ export interface UpdateUserDto {
   name?: string;
   email?: string;
   password?: string;
+  sector?: string;
   role?: 'admin' | 'supervisor' | 'user';
   isActive?: boolean;
 }
@@ -56,4 +59,3 @@ export class UsersService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }
-

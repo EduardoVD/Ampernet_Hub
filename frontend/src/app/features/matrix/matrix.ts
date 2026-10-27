@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ResponsibilitiesService, ResponsibilityItem } from '../../core/services/responsibilities';
+import { SectorsService, SectorItem } from '../../core/services/sectors';
 import { AuthService } from '../../core/services/auth';
 import { ToastService } from '../../core/services/toast';
 import { ConfirmService } from '../../core/services/confirm';
@@ -16,12 +17,14 @@ import { EmptyStateComponent } from '../../core/components/empty-state/empty-sta
 })
 export class Matrix implements OnInit {
   private responsibilitiesService = inject(ResponsibilitiesService);
+  private sectorsService = inject(SectorsService);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
 
   currentUser = this.authService.currentUser;
   responsibilities = signal<ResponsibilityItem[]>([]);
+  sectors = signal<SectorItem[]>([]);
 
   cityFilter = signal('');
   sectorFilter = signal('');
@@ -61,6 +64,7 @@ export class Matrix implements OnInit {
 
   ngOnInit(): void {
     this.loadResponsibilities();
+    this.loadSectors();
   }
 
   loadResponsibilities(): void {
@@ -70,10 +74,23 @@ export class Matrix implements OnInit {
     });
   }
 
+  loadSectors(): void {
+    this.sectorsService.getSectors().subscribe({
+      next: (data) => {
+        this.sectors.set(data);
+        if (data.length > 0 && !this.formSector()) {
+          this.formSector.set(data[0].name);
+        }
+      },
+      error: (err) => console.error('Erro ao carregar setores:', err),
+    });
+  }
+
   openCreateModal(): void {
     this.editingId.set(null);
     this.formCity.set('');
-    this.formSector.set('NOC');
+    const defaultSector = this.sectors().length > 0 ? this.sectors()[0].name : 'NOC';
+    this.formSector.set(defaultSector);
     this.formResponsible.set('');
     this.formRamal.set('');
     this.formEmail.set('');

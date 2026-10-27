@@ -118,7 +118,7 @@
             </svg>
             <input
               type="text"
-              placeholder="Buscar título, descrição ou operador..."
+              placeholder="Buscar título, descrição ou setor..."
               [ngModel]="issueSearch()"
               (ngModelChange)="onIssueSearchInput($event)"
             />
@@ -263,7 +263,7 @@
               <th>Resolução</th>
               <th>Duração</th>
               <th>Título da Ocorrência</th>
-              <th>Operador</th>
+              <th>Setor</th>
               <th class="no-print text-center">Ficha</th>
             </tr>
           </thead>
@@ -306,7 +306,7 @@
               </td>
               <td>
                 <div class="author-cell">
-                  <span class="author-name">{{ item.author?.name || 'Sistema' }}</span>
+                  <span class="author-name">{{ item.author?.sector || 'Não informado' }}</span>
                 </div>
               </td>
               <td class="no-print text-center">
@@ -530,6 +530,11 @@
           <div class="detail-item">
             <span class="detail-label">Duração Calculada:</span>
             <span class="detail-val duration-highlight">{{ formatDuration(issue.durationFormatted) }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Setor / Departamento:</span>
+            <span class="detail-val">{{ issue.author?.sector || 'Não informado' }}</span>
           </div>
 
           <div class="detail-item">

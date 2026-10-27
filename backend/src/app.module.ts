@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { NoticesModule } from './notices/notices.module';
 import { IssuesModule } from './issues/issues.module';
 import { ResponsibilitiesModule } from './responsibilities/responsibilities.module';
+import { SectorsModule } from './sectors/sectors.module';
 import { ReportsModule } from './reports/reports.module';
 
 @Module({
@@ -47,6 +48,7 @@ import { ReportsModule } from './reports/reports.module';
     NoticesModule,
     IssuesModule,
     ResponsibilitiesModule,
+    SectorsModule,
     ReportsModule,
   ],
   providers: [

@@ -429,21 +429,28 @@
             color: rgba(255, 255, 255, 0.8);
           }
 
-          input, select, textarea {
+          input {
             @include input-field;
-            padding: 0.7rem 0.9rem;
+            padding: 0.7rem 0.95rem;
+            font-size: 0.92rem;
+            box-sizing: border-box;
+          }
 
-            option {
-              background: $card-bg;
-              color: $text-light;
-            }
+          select {
+            @include select-field;
+            padding: 0.7rem 2.75rem 0.7rem 0.95rem;
+            font-size: 0.92rem;
+            box-sizing: border-box;
           }
 
           textarea {
+            @include input-field;
+            padding: 0.7rem 0.95rem;
             resize: vertical;
             min-height: 100px;
             font-family: $font-body;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
+            box-sizing: border-box;
           }
         }
 

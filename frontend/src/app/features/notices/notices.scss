@@ -396,19 +396,26 @@
             color: $text-light;
           }
 
-          input, select, textarea {
+          input {
             @include input-field;
             padding: 0.75rem 1rem;
+            font-size: 0.92rem;
+            box-sizing: border-box;
+          }
 
-            option {
-              background-color: $card-bg;
-              color: $text-light;
-            }
+          select {
+            @include select-field;
+            padding: 0.75rem 2.75rem 0.75rem 1rem;
+            font-size: 0.92rem;
+            box-sizing: border-box;
           }
 
           textarea {
+            @include input-field;
+            padding: 0.75rem 1rem;
             resize: vertical;
             min-height: 100px;
+            box-sizing: border-box;
           }
         }
 

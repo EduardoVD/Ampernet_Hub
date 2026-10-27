@@ -54,7 +54,7 @@ export class ReportsService {
     if (query.search && query.search.trim()) {
       const term = `%${query.search.trim().toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(issue.title) LIKE :term OR LOWER(issue.description) LIKE :term OR LOWER(author.name) LIKE :term)',
+        '(LOWER(issue.title) LIKE :term OR LOWER(issue.description) LIKE :term OR LOWER(author.name) LIKE :term OR LOWER(author.sector) LIKE :term)',
         { term },
       );
     }
@@ -111,7 +111,14 @@ export class ReportsService {
         durationFormatted,
         isDeleted: !!issue.deletedAt,
         deletedAt: issue.deletedAt,
-        author: issue.author ? { id: issue.author.id, name: issue.author.name, email: issue.author.email } : null,
+        author: issue.author
+          ? {
+              id: issue.author.id,
+              name: issue.author.name,
+              email: issue.author.email,
+              sector: issue.author.sector || 'Não informado',
+            }
+          : null,
         createdAt: issue.createdAt,
       };
     });

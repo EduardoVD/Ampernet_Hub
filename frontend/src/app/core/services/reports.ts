@@ -14,7 +14,7 @@ export interface IssueHistoryItem {
   durationFormatted: string;
   isDeleted: boolean;
   deletedAt?: string | null;
-  author?: { id: number; name: string; email: string } | null;
+  author?: { id: number; name: string; email: string; sector?: string } | null;
   createdAt: string;
 }
 
@@ -43,7 +43,7 @@ export interface NoticeHistoryItem {
   updatedAt?: string;
   isDeleted: boolean;
   deletedAt?: string | null;
-  author?: { id: number; name: string; email: string } | null;
+  author?: { id: number; name: string; email: string; sector?: string } | null;
   readCount: number;
   totalUsers: number;
   readPercentage: number;

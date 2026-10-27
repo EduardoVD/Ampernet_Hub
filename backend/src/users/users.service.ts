@@ -28,6 +28,7 @@ export class UsersService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.seedInitialAdmin();
+    await this.assignDefaultSectorToExistingUsers();
   }
 
   //Português - Garante a existência de ao menos um administrador padrão no sistema.
@@ -62,6 +63,7 @@ export class UsersService implements OnModuleInit {
             email,
             password: hashedPassword,
             role: UserRole.ADMIN,
+            sector: 'Administração',
             isActive: true,
           });
           await this.userRepository.save(adminUser);
@@ -70,6 +72,9 @@ export class UsersService implements OnModuleInit {
           );
         } else {
           existingByEmail.role = UserRole.ADMIN;
+          if (!existingByEmail.sector) {
+            existingByEmail.sector = 'Administração';
+          }
           await this.userRepository.save(existingByEmail);
           this.logger.log(
             `[SEED] Usuário existente (${email}) promovido para o perfil ADMIN.`,
@@ -83,9 +88,27 @@ export class UsersService implements OnModuleInit {
     }
   }
 
+  //Português - Garante que usuários existentes sem setor recebam um setor padrão.
+  private async assignDefaultSectorToExistingUsers(): Promise<void> {
+    try {
+      const usersWithoutSector = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.sector IS NULL OR TRIM(user.sector) = ""')
+        .getMany();
+
+      for (const u of usersWithoutSector) {
+        u.sector = u.role === UserRole.ADMIN ? 'Administração' : 'NOC';
+        await this.userRepository.save(u);
+      }
+    } catch (err) {
+      this.logger.warn('Aviso ao sincronizar setores em usuários legados:', err);
+    }
+  }
+
   //Português - Método assíncrono para criar um novo usuário no sistema.
   async create(createUserDto: CreateUserDto): Promise<User> {
     const normalizedEmail = createUserDto.email.trim().toLowerCase();
+    const normalizedSector = (createUserDto.sector || 'Administração').trim();
 
     //Português - Verifica se já existe um usuário cadastrado com o mesmo e-mail.
     const existingUser = await this.userRepository.findOne({
@@ -105,6 +128,7 @@ export class UsersService implements OnModuleInit {
     const newUser = this.userRepository.create({
       ...createUserDto,
       email: normalizedEmail,
+      sector: normalizedSector,
       password: hashedPassword,
     });
 
@@ -165,12 +189,20 @@ export class UsersService implements OnModuleInit {
       }
     }
 
-    // 3. Regra de segurança: Não permitir auto-desativação do admin conectado
+    // 3. Validação de obrigatoriedade de setor caso fornecido
+    if (updateUserDto.sector !== undefined) {
+      if (!updateUserDto.sector || !updateUserDto.sector.trim()) {
+        throw new BadRequestException('O setor do colaborador é obrigatório.');
+      }
+      updateUserDto.sector = updateUserDto.sector.trim();
+    }
+
+    // 4. Regra de segurança: Não permitir auto-desativação do admin conectado
     if (currentUserId && id === currentUserId && updateUserDto.isActive === false) {
       throw new BadRequestException('Você não pode desativar sua própria conta de administrador.');
     }
 
-    // 4. Regra de segurança: Garantir que o sistema nunca fique sem nenhum administrador ativo
+    // 5. Regra de segurança: Garantir que o sistema nunca fique sem nenhum administrador ativo
     if (
       user.role === UserRole.ADMIN &&
       (updateUserDto.isActive === false || (updateUserDto.role && updateUserDto.role !== UserRole.ADMIN))

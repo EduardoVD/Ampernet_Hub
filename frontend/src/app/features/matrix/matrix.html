@@ -158,13 +158,9 @@
               [ngModel]="formSector()"
               (ngModelChange)="formSector.set($event)"
               name="sector"
+              required
             >
-              <option value="NOC">NOC</option>
-              <option value="Suporte">Suporte</option>
-              <option value="Comercial">Comercial</option>
-              <option value="Técnico">Técnico</option>
-              <option value="Infraestrutura">Infraestrutura</option>
-              <option value="Financeiro">Financeiro</option>
+              <option *ngFor="let s of sectors()" [value]="s.name">{{ s.name }}</option>
             </select>
           </div>
         </div>
