@@ -1,12 +1,12 @@
-<div class="issues-page">
-  <section class="page-title-bar">
-    <div class="title-left">
+<div class="issues-page" [class.tv-mode-active]="isTvMode()">
+  <section class="page-title-bar" [class.tv-title-bar]="isTvMode()">
+    <div class="title-left" *ngIf="!isTvMode()">
       <h2>REGISTRO DE PROBLEMAS GERAIS</h2>
       <p>Histórico detalhado de ocorrências e manutenções</p>
     </div>
 
-    <div class="title-right">
-      <div class="filter-pills">
+    <div class="title-right" [class.tv-title-right]="isTvMode()">
+      <div class="filter-pills" *ngIf="!isTvMode()">
         <button
           type="button"
           class="filter-pill"
@@ -33,7 +33,7 @@
         </button>
       </div>
 
-      <a routerLink="/relatorios" [queryParams]="{ tab: 'issues' }" class="btn-history" title="Visualizar histórico e relatórios de ocorrências">
+      <a *ngIf="!isTvMode()" routerLink="/relatorios" [queryParams]="{ tab: 'issues' }" class="btn-history" title="Visualizar histórico e relatórios de ocorrências">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
           <path d="M3 3v5h5"/>
@@ -42,7 +42,32 @@
         <span>Histórico</span>
       </a>
 
-      <button *ngIf="canManage()" class="btn-new-issue" (click)="openCreateModal()">
+      <!-- Botão Modo Telão / Restaurar (Permanece visível para permitir o retorno ao layout original) -->
+      <button
+        type="button"
+        class="btn-tv-mode"
+        [class.active]="isTvMode()"
+        (click)="toggleTvMode()"
+        [title]="isTvMode() ? 'Sair do Modo Telão (Restaurar layout padrão)' : 'Modo Telão (Expandir para tela cheia / monitoramento)'"
+      >
+        <!-- Ícone Expandir (quando em modo padrão) -->
+        <svg *ngIf="!isTvMode()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        <!-- Ícone Minimizar / Restaurar (quando em modo telão) -->
+        <svg *ngIf="isTvMode()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 14 10 14 10 20"></polyline>
+          <polyline points="20 10 14 10 14 4"></polyline>
+          <line x1="14" y1="10" x2="21" y2="3"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        <span>{{ isTvMode() ? 'Restaurar' : 'Telão' }}</span>
+      </button>
+
+      <button *ngIf="!isTvMode() && canManage()" class="btn-new-issue" (click)="openCreateModal()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -52,7 +77,45 @@
     </div>
   </section>
 
-  <section class="issues-list">
+  <!-- Área dos Cards com container para Overlay de Alerta -->
+  <div class="issues-cards-wrapper" [class.tv-cards-wrapper]="isTvMode()" [class.has-active-alert]="!!currentAlert()">
+    <!-- Overlay de Alerta em Tempo Real (5s) -->
+    <div
+      *ngIf="currentAlert() as alert"
+      class="issue-alert-overlay"
+      [class.created]="alert.type === 'created'"
+      [class.resolved]="alert.type === 'resolved'"
+      [class.tv-overlay]="isTvMode()"
+      [class.fading-out]="alertFadingOut()"
+      (click)="dismissAlert()"
+    >
+      <div class="alert-content-box" (click)="$event.stopPropagation()">
+        <div class="alert-icon-badge">
+          <!-- Ícone Alerta / Novo Problema (Conforme padrão do sistema / Empty State) -->
+          <svg *ngIf="alert.type === 'created'" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <!-- Ícone Conclusão / Problema Resolvido (Conforme padrão do sistema / Empty State) -->
+          <svg *ngIf="alert.type === 'resolved'" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="8 12.5 11 15.5 16.5 9"/>
+          </svg>
+        </div>
+
+        <h2 class="alert-title">{{ alert.title }}</h2>
+      </div>
+    </div>
+
+    <!-- LISTAGEM DE CARDS (Ocultada com fade out durante o alerta, e reexibida com fade in após o término) -->
+    <section
+      class="issues-list"
+      [class.tv-mode-grid]="isTvMode()"
+      [class.cards-fading-out]="cardsFadingOut()"
+      [class.hidden-by-alert]="!!currentAlert()"
+      [class.restoring-cards]="isRestoringCards()"
+    >
     <div *ngIf="filteredIssues().length === 0" class="empty-state-wrapper">
       <app-empty-state
         icon="issues"
@@ -61,106 +124,168 @@
       ></app-empty-state>
     </div>
 
-    <article
-      *ngFor="let issue of filteredIssues()"
-      class="issue-card"
-      [ngClass]="issue.status"
-    >
-      <header class="card-header">
-        <div class="header-left">
-          <span class="badge" [ngClass]="issue.status">
-            {{ issue.status === 'ongoing' ? 'Problema Ocorrendo' : 'Problema Resolvido' }}
-          </span>
-          <h3 class="issue-title">{{ issue.title }}</h3>
+    <!-- MODO PADRÃO (LISTAGEM HORIZONTAL PADRÃO) -->
+    <ng-container *ngIf="!isTvMode()">
+      <article
+        *ngFor="let issue of filteredIssues(); trackBy: trackById"
+        class="issue-card"
+        [ngClass]="issue.status"
+      >
+        <header class="card-header">
+          <div class="header-left">
+            <span class="badge" [ngClass]="issue.status">
+              {{ issue.status === 'ongoing' ? 'Problema Ocorrendo' : 'Problema Resolvido' }}
+            </span>
+            <h3 class="issue-title">{{ issue.title }}</h3>
+          </div>
+
+          <div class="header-actions" *ngIf="canManage()">
+            <button
+              *ngIf="issue.status === 'ongoing'"
+              class="btn-action resolve"
+              (click)="resolveIssue(issue, $event)"
+              title="Marcar como resolvido agora"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+
+            <button
+              class="btn-action edit"
+              (click)="openEditModal(issue, $event)"
+              title="Editar ocorrência"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                <path d="m15 5 4 4"/>
+              </svg>
+            </button>
+
+            <button
+              class="btn-action delete"
+              (click)="deleteIssue(issue, $event)"
+              title="Excluir ocorrência"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <p class="issue-description">{{ issue.description }}</p>
+
+        <footer class="card-footer">
+          <div class="meta-block">
+            <div class="icon start-icon" title="Data de Início">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div class="meta-info">
+              <span class="label">INÍCIO</span>
+              <span class="value">{{ issue.formattedStarted }}</span>
+            </div>
+          </div>
+
+          <div *ngIf="issue.status === 'resolved' && issue.formattedResolved" class="meta-block">
+            <div class="icon resolved-icon" title="Data de Término">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div class="meta-info">
+              <span class="label">TÉRMINO</span>
+              <span class="value">{{ issue.formattedResolved }}</span>
+            </div>
+          </div>
+
+          <div *ngIf="issue.status === 'resolved' && issue.durationText" class="meta-block">
+            <div class="icon duration-icon" title="Duração da Ocorrência">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="meta-info">
+              <span class="label">DURAÇÃO</span>
+              <span class="value duration-val">{{ issue.durationText }}</span>
+            </div>
+          </div>
+        </footer>
+      </article>
+    </ng-container>
+
+    <!-- MODO TELÃO (CARDS VERTICAIS OTIMIZADOS CONFORME LAYOUT DE REFERÊNCIA) -->
+    <ng-container *ngIf="isTvMode()">
+      <article
+        *ngFor="let issue of filteredIssues(); trackBy: trackById"
+        class="tv-card"
+        [ngClass]="issue.status"
+      >
+        <div class="tv-card-header">
+          <h3 class="tv-card-title" [title]="issue.title">{{ issue.title }}</h3>
         </div>
 
-        <div class="header-actions" *ngIf="canManage()">
-          <button
-            *ngIf="issue.status === 'ongoing'"
-            class="btn-action resolve"
-            (click)="resolveIssue(issue, $event)"
-            title="Marcar como resolvido agora"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </button>
+        <p class="tv-card-description" [title]="issue.description">{{ issue.description }}</p>
 
-          <button
-            class="btn-action edit"
-            (click)="openEditModal(issue, $event)"
-            title="Editar ocorrência"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-              <path d="m15 5 4 4"/>
-            </svg>
-          </button>
+        <div class="tv-card-meta">
+          <div class="meta-line dept">Departamento: {{ getTvDepartment(issue) }}</div>
 
-          <button
-            class="btn-action delete"
-            (click)="deleteIssue(issue, $event)"
-            title="Excluir ocorrência"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"/>
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-              <line x1="10" y1="11" x2="10" y2="17"/>
-              <line x1="14" y1="11" x2="14" y2="17"/>
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      <p class="issue-description">{{ issue.description }}</p>
-
-      <footer class="card-footer">
-        <div class="meta-block">
-          <div class="icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
+          <div class="meta-line meta-with-icon">
+            <div class="meta-icon start-icon" title="Data de Início">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <span class="meta-text">Início: {{ getTvDate(issue.startedAt) }}</span>
           </div>
-          <div class="meta-info">
-            <span class="label">INÍCIO</span>
-            <span class="value">{{ issue.formattedStarted }}</span>
+
+          <div *ngIf="issue.status === 'resolved' && issue.resolvedAt" class="meta-line meta-with-icon">
+            <div class="meta-icon resolved-icon" title="Data de Término">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <span class="meta-text">Fim: {{ getTvDate(issue.resolvedAt) }}</span>
+          </div>
+
+          <div class="meta-line meta-with-icon duration">
+            <div class="meta-icon duration-icon" title="Duração da Ocorrência">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <span class="meta-text">Duração: {{ getTvDuration(issue) }}</span>
           </div>
         </div>
 
-        <div *ngIf="issue.status === 'resolved' && issue.formattedResolved" class="meta-block">
-          <div class="icon resolved-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </div>
-          <div class="meta-info">
-            <span class="label">TÉRMINO</span>
-            <span class="value">{{ issue.formattedResolved }}</span>
-          </div>
+        <div class="tv-status-badge" [ngClass]="issue.status">
+          <span class="dot">●</span>
+          <span>{{ issue.status === 'resolved' ? 'Resolvido' : 'Em andamento' }}</span>
         </div>
-
-        <div *ngIf="issue.status === 'resolved' && issue.durationText" class="meta-block">
-          <div class="icon duration-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-          </div>
-          <div class="meta-info">
-            <span class="label">DURAÇÃO</span>
-            <span class="value duration-val">{{ issue.durationText }}</span>
-          </div>
-        </div>
-      </footer>
-    </article>
+      </article>
+    </ng-container>
   </section>
+  </div>
 
   <div *ngIf="isModalOpen()" class="modal-backdrop" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">

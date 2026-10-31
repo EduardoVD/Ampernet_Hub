@@ -12,6 +12,7 @@ export interface NoticeResponse {
   createdAt: string;
   updatedAt?: string;
   isRead: boolean;
+  readAt?: string | null;
 }
 
 export interface NoticeReader {

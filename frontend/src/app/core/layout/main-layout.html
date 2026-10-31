@@ -1,4 +1,4 @@
-<div class="app-layout">
+<div class="app-layout" [class.tv-mode-active]="isTvMode()">
   <aside class="sidebar">
     <div class="sidebar-top">
       <div class="user-avatar-btn" title="Perfil">{{ userInitial() }}</div>

@@ -256,7 +256,6 @@
           <div class="user-avatar read">{{ reader.name.charAt(0).toUpperCase() }}</div>
           <div class="user-info">
             <span class="name">{{ reader.name }}</span>
-            <span class="email">{{ reader.email }}</span>
           </div>
           <span class="read-date" *ngIf="reader.readAt">
             {{ reader.readAt | date:'dd/MM/yyyy · HH:mm' }}
@@ -271,7 +270,6 @@
           <div class="user-avatar pending">{{ pendingUser.name.charAt(0).toUpperCase() }}</div>
           <div class="user-info">
             <span class="name">{{ pendingUser.name }}</span>
-            <span class="email">{{ pendingUser.email }}</span>
           </div>
           <span class="pending-tag">Pendente</span>
         </div>

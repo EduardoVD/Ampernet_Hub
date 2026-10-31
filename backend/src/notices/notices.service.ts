@@ -26,29 +26,57 @@ export class NoticesService {
     return await this.noticeRepository.save(newNotice);
   }
 
-  //Português - Lista todos os recados e marca se o usuário autenticado já os leu.
+  //Português - Lista todos os recados ativos para o usuário autenticado.
+  // Regra de expiração individual:
+  // - Recados não lidos permanecem visíveis indefinidamente.
+  // - Recados lidos permanecem visíveis por 24 horas a partir da confirmação de leitura individual (readAt).
   async findAll(userId?: number, limit = 100): Promise<any[]> {
+    const fetchLimit = limit > 0 ? Math.max(limit, 200) : 200;
     const notices = await this.noticeRepository.find({
       order: { createdAt: 'DESC' },
-      take: limit > 0 ? limit : 100,
+      take: fetchLimit,
     });
 
     if (!userId) {
-      return notices.map((n) => ({ ...n, isRead: false }));
+      return notices.map((n) => ({ ...n, isRead: false, readAt: null }));
     }
 
-    //Português - Busca quais avisos este usuário já leu.
+    //Português - Busca quais avisos este usuário já leu com data de leitura.
     const userReads = await this.noticeReadRepository.find({
       where: { user: { id: userId } },
       relations: { notice: true },
     });
 
-    const readNoticeIds = new Set(userReads.map((r) => r.notice?.id));
+    const readMap = new Map<number, Date>();
+    for (const r of userReads) {
+      if (r.notice?.id) {
+        readMap.set(r.notice.id, r.readAt);
+      }
+    }
 
-    return notices.map((notice) => ({
-      ...notice,
-      isRead: readNoticeIds.has(notice.id),
-    }));
+    const now = Date.now();
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+
+    // Filtra os recados:
+    // Se o usuário não leu, permanece visível indefinidamente.
+    // Se leu, só permanece visível nas primeiras 24 horas após a leitura.
+    const visibleNotices = notices.filter((notice) => {
+      const readAt = readMap.get(notice.id);
+      if (!readAt) {
+        return true;
+      }
+      const timeSinceRead = now - new Date(readAt).getTime();
+      return timeSinceRead < TWENTY_FOUR_HOURS_MS;
+    });
+
+    return visibleNotices.map((notice) => {
+      const readAt = readMap.get(notice.id);
+      return {
+        ...notice,
+        isRead: !!readAt,
+        readAt: readAt ? readAt.toISOString() : null,
+      };
+    });
   }
 
   async findOne(id: number): Promise<Notice> {

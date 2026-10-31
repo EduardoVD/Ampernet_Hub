@@ -13,7 +13,7 @@ export interface IssueItem {
   formattedStarted?: string;
   formattedResolved?: string;
   durationText?: string;
-  author?: { id: number; name: string; email: string } | null;
+  author?: { id: number; name: string; email: string; sector?: string | null } | null;
   createdAt?: string;
 }
 

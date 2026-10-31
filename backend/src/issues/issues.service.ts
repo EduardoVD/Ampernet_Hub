@@ -51,8 +51,27 @@ export class IssuesService {
       .orderBy('issue.status', 'ASC')
       .addOrderBy('issue.startedAt', 'DESC');
 
-    if (status) {
+    // Regra de expiração automática de problemas resolvidos:
+    // Ocorrências em andamento permanecem indefinidamente.
+    // Ocorrências resolvidas permanecem visíveis na tela ativa por até 24 horas após a resolução.
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    if (status === IssueStatus.RESOLVED) {
+      query.andWhere(
+        'issue.status = :status AND COALESCE(issue.resolvedAt, issue.updatedAt) >= :twentyFourHoursAgo',
+        { status, twentyFourHoursAgo },
+      );
+    } else if (status === IssueStatus.ONGOING) {
       query.andWhere('issue.status = :status', { status });
+    } else {
+      query.andWhere(
+        '(issue.status = :ongoing OR (issue.status = :resolved AND COALESCE(issue.resolvedAt, issue.updatedAt) >= :twentyFourHoursAgo))',
+        {
+          ongoing: IssueStatus.ONGOING,
+          resolved: IssueStatus.RESOLVED,
+          twentyFourHoursAgo,
+        },
+      );
     }
 
     if (limit && limit > 0) {

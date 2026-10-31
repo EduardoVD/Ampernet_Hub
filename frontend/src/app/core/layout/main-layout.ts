@@ -2,6 +2,7 @@ import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../services/auth';
+import { LayoutService } from '../services/layout.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -13,8 +14,10 @@ import { AuthService } from '../services/auth';
 export class MainLayoutComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private layoutService = inject(LayoutService);
 
   currentUser = this.authService.currentUser;
+  isTvMode = this.layoutService.isTvMode;
 
   userInitial = computed(() => {
     const name = this.currentUser()?.name;

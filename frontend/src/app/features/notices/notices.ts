@@ -17,6 +17,7 @@ export interface NoticeDetail {
   createdAt: string;
   updatedAt?: string;
   read: boolean;
+  readAt?: string | null;
 }
 
 @Component({
@@ -81,11 +82,19 @@ export class NoticesComponent implements OnInit {
             author: authorName,
             createdAt: formattedCreated,
             updatedAt: formattedUpdated,
-            read: item.isRead ?? false
+            read: item.isRead ?? false,
+            readAt: item.readAt || null,
           };
         });
 
-        this.notices.set(formatted);
+        const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const activeNotices = formatted.filter((item) => {
+          if (!item.read || !item.readAt) return true;
+          return now - new Date(item.readAt).getTime() < TWENTY_FOUR_HOURS_MS;
+        });
+
+        this.notices.set(activeNotices);
       },
       error: (err: any) => console.error('Erro ao carregar recados no mural:', err)
     });
@@ -94,8 +103,9 @@ export class NoticesComponent implements OnInit {
   markAsRead(id: string): void {
     this.noticesService.markAsRead(id).subscribe({
       next: () => {
+        const nowIso = new Date().toISOString();
         this.notices.update(items =>
-          items.map(item => (item.id === id ? { ...item, read: true } : item))
+          items.map(item => (item.id === id ? { ...item, read: true, readAt: nowIso } : item))
         );
       },
       error: (err: any) => console.error('Erro ao marcar como lido no banco:', err)

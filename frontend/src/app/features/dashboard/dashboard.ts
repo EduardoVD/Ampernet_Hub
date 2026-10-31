@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, HostListener, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription, interval } from 'rxjs';
 import { AuthService } from '../../core/services/auth';
 import { NoticesService } from '../../core/services/notices';
 import { IssuesService, IssueItem } from '../../core/services/issues';
@@ -46,6 +47,21 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   notices = signal<NoticeItem[]>([]);
   responsibilities = signal<ResponsibilityItem[]>([]);
 
+  // Estado do Alerta contextual em Problemas Gerais
+  currentAlert = signal<{ type: 'created' | 'resolved'; title: string } | null>(null);
+  alertFadingOut = signal(false);
+  cardsFadingOut = signal(false);
+  isRestoringCards = signal(false);
+
+  private knownIssuesMap = new Map<number, { status: string; title: string }>();
+  private isInitialLoadDone = false;
+  private issuesPollingSub?: Subscription;
+
+  private alertTimeout: any = null;
+  private alertFadeTimeout: any = null;
+  private alertStartTimeout: any = null;
+  private restoreCardsTimeout: any = null;
+
   activeModal = signal<ModalDetail | null>(null);
 
   canScrollLeft = signal(false);
@@ -80,8 +96,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadBackendNotices();
-    this.loadBackendIssues();
+    this.loadBackendIssues(false);
     this.loadBackendResponsibilities();
+
+    // Polling a cada 6 segundos para detecção de novos problemas/resoluções em tempo real
+    this.issuesPollingSub = interval(6000).subscribe(() => {
+      this.loadBackendIssues(true);
+    });
   }
 
   ngAfterViewInit(): void {
@@ -90,6 +111,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopContinuousScroll();
+    this.issuesPollingSub?.unsubscribe();
+    if (this.alertTimeout) clearTimeout(this.alertTimeout);
+    if (this.alertFadeTimeout) clearTimeout(this.alertFadeTimeout);
+    if (this.alertStartTimeout) clearTimeout(this.alertStartTimeout);
+    if (this.restoreCardsTimeout) clearTimeout(this.restoreCardsTimeout);
   }
 
   @HostListener('window:resize')
@@ -224,25 +250,140 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => this.updateScrollState(), 350);
   }
 
-  loadBackendIssues(): void {
+  loadBackendIssues(silent = false): void {
     this.issuesService.getIssues().subscribe({
       next: (data) => {
-        this.issues.set(data);
-        setTimeout(() => this.updateScrollState(), 50);
+        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+        const activeIssues = data.filter((i) => {
+          if (i.status === 'resolved') {
+            const resolvedTime = i.resolvedAt ? new Date(i.resolvedAt).getTime() : 0;
+            return resolvedTime >= twentyFourHoursAgo;
+          }
+          return true;
+        });
+
+        if (this.isInitialLoadDone && silent) {
+          for (const item of activeIssues) {
+            const previous = this.knownIssuesMap.get(item.id);
+            if (!previous) {
+              this.triggerAlert(item.status === 'resolved' ? 'resolved' : 'created', item.title);
+            } else if (previous.status === 'ongoing' && item.status === 'resolved') {
+              this.triggerAlert('resolved', item.title);
+            }
+          }
+        }
+
+        this.knownIssuesMap.clear();
+        for (const item of activeIssues) {
+          this.knownIssuesMap.set(item.id, { status: item.status, title: item.title });
+        }
+
+        const hasChanged = !this.isInitialLoadDone || this.hasIssuesChanged(this.issues(), activeIssues);
+        this.isInitialLoadDone = true;
+
+        if (hasChanged) {
+          this.issues.set(activeIssues);
+          setTimeout(() => this.updateScrollState(), 50);
+        }
       },
       error: (err: any) => console.error('Erro ao carregar ocorrências:', err)
     });
   }
 
+  private hasIssuesChanged(current: IssueItem[], incoming: IssueItem[]): boolean {
+    if (current.length !== incoming.length) return true;
+    for (let i = 0; i < incoming.length; i++) {
+      const a = current[i];
+      const b = incoming[i];
+      if (!a || !b) return true;
+      if (
+        a.id !== b.id ||
+        a.status !== b.status ||
+        a.title !== b.title ||
+        a.description !== b.description ||
+        a.startedAt !== b.startedAt ||
+        a.resolvedAt !== b.resolvedAt
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  trackById(_index: number, issue: IssueItem): number {
+    return issue.id;
+  }
+
+  triggerAlert(type: 'created' | 'resolved', title: string): void {
+    if (this.alertTimeout) clearTimeout(this.alertTimeout);
+    if (this.alertFadeTimeout) clearTimeout(this.alertFadeTimeout);
+    if (this.alertStartTimeout) clearTimeout(this.alertStartTimeout);
+    if (this.restoreCardsTimeout) clearTimeout(this.restoreCardsTimeout);
+
+    this.isRestoringCards.set(false);
+    this.alertFadingOut.set(false);
+
+    // Passo 1: Ocultar o conteúdo interno da seção com fade out (350ms)
+    this.cardsFadingOut.set(true);
+
+    // Passo 2: Exibir a tela/overlay de aviso após a transição suave de fade out dos cards
+    this.alertStartTimeout = setTimeout(() => {
+      this.cardsFadingOut.set(false);
+      this.currentAlert.set({ type, title });
+
+      // Passo 3: Ocultar o aviso com fade out aos 4.4s
+      this.alertFadeTimeout = setTimeout(() => {
+        this.alertFadingOut.set(true);
+      }, 4400);
+
+      // Passo 4: Encerrar o aviso e reexibir os cards com fade in aos 5.0s
+      this.alertTimeout = setTimeout(() => {
+        this.currentAlert.set(null);
+        this.alertFadingOut.set(false);
+        this.isRestoringCards.set(true);
+
+        this.restoreCardsTimeout = setTimeout(() => {
+          this.isRestoringCards.set(false);
+          this.updateScrollState();
+        }, 400);
+      }, 5000);
+    }, 350);
+  }
+
+  dismissAlert(): void {
+    if (this.alertTimeout) clearTimeout(this.alertTimeout);
+    if (this.alertFadeTimeout) clearTimeout(this.alertFadeTimeout);
+    if (this.alertStartTimeout) clearTimeout(this.alertStartTimeout);
+    if (this.restoreCardsTimeout) clearTimeout(this.restoreCardsTimeout);
+
+    this.currentAlert.set(null);
+    this.alertFadingOut.set(false);
+    this.cardsFadingOut.set(false);
+    this.isRestoringCards.set(true);
+
+    this.restoreCardsTimeout = setTimeout(() => {
+      this.isRestoringCards.set(false);
+      this.updateScrollState();
+    }, 400);
+  }
+
   loadBackendNotices(): void {
     this.noticesService.getNotices().subscribe({
       next: (data) => {
-        const formatted = data.map((item) => ({
-          id: String(item.id),
-          title: item.title,
-          description: item.content || '',
-          read: item.isRead
-        }));
+        const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const formatted = data
+          .filter((item) => {
+            if (!item.isRead || !item.readAt) return true;
+            return now - new Date(item.readAt).getTime() < TWENTY_FOUR_HOURS_MS;
+          })
+          .map((item) => ({
+            id: String(item.id),
+            title: item.title,
+            description: item.content || '',
+            read: item.isRead,
+            readAt: item.readAt || null,
+          }));
         this.notices.set(formatted);
       },
       error: (err: any) => console.error('Erro ao carregar recados:', err)
@@ -259,8 +400,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   markNoticeAsRead(id: string): void {
     this.noticesService.markAsRead(id).subscribe({
       next: () => {
+        const nowIso = new Date().toISOString();
         this.notices.update(items =>
-          items.map(n => (n.id === id ? { ...n, read: true } : n))
+          items.map(n => (n.id === id ? { ...n, read: true, readAt: nowIso } : n))
         );
 
         if (this.activeModal()?.noticeId === id) {

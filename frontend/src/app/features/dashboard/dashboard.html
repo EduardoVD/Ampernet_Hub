@@ -1,10 +1,43 @@
 <div class="dashboard-page">
-  <section class="section-card issues-section">
+  <section class="section-card issues-section" [class.has-active-alert]="!!currentAlert()">
       <header class="section-banner">
         <h2>REGISTRO DE PROBLEMAS GERAIS</h2>
       </header>
+
+      <!-- OVERLAY DE ALERTA NO DASHBOARD (Delimitado estritamente à seção de Problemas Gerais) -->
+      <div
+        *ngIf="currentAlert() as alert"
+        class="dashboard-issue-alert-overlay"
+        [class.created]="alert.type === 'created'"
+        [class.resolved]="alert.type === 'resolved'"
+        [class.fading-out]="alertFadingOut()"
+        (click)="dismissAlert()"
+      >
+        <div class="alert-content-box" (click)="$event.stopPropagation()">
+          <div class="alert-icon-badge">
+            <!-- Ícone Alerta / Novo Problema (Conforme padrão do sistema / Empty State) -->
+            <svg *ngIf="alert.type === 'created'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <!-- Ícone Conclusão / Problema Resolvido (Conforme padrão do sistema / Empty State) -->
+            <svg *ngIf="alert.type === 'resolved'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="8 12.5 11 15.5 16.5 9"/>
+            </svg>
+          </div>
+
+          <h3 class="alert-title">{{ alert.title }}</h3>
+        </div>
+      </div>
+
+      <!-- CONTEÚDO INTERNO DOS CARDS (Ocultado durante o alerta e reexibido em seguida) -->
       <div
         class="issues-wrapper"
+        [class.cards-fading-out]="cardsFadingOut()"
+        [class.hidden-by-alert]="!!currentAlert()"
+        [class.restoring-cards]="isRestoringCards()"
         (mousemove)="onWrapperMouseMove($event)"
         (mouseleave)="onWrapperMouseLeave()"
       >
@@ -37,7 +70,7 @@
           </div>
           <div *ngIf="issues().length > 0" class="issues-grid">
             <div
-              *ngFor="let issue of issues()"
+              *ngFor="let issue of issues(); trackBy: trackById"
               class="issue-card"
               [ngClass]="issue.status"
               (click)="openIssueModal(issue)"
